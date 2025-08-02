@@ -4,22 +4,33 @@ require('dotenv').config();
 class GeminiService {
     constructor() {
         this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     }
 
     async analyzeData(dataText, question) {
         try {
             const prompt = `
-            Bạn là một chuyên gia phân tích dữ liệu. Hãy phân tích dữ liệu sau và trả lời câu hỏi:
+            You are a data analyst. Analyze the following JSON sales data and answer the question.
             
-            Dữ liệu: ${dataText}
+            Data: ${dataText}
             
-            Câu hỏi: ${question}
             
-            Hãy đưa ra phân tích chi tiết, insights và recommendations nếu có.
+            Use this data to answer the question below.
+
+            Question: ${question}
+
+            Rules:
+            - Use only the information in the JSON data.
+            - Do not guess or invent any values.
+            - Do NOT return JSON. Answer in plain text only.
+            - If the question involves revenue, calculate it as Price multiplied by Quantity.
+            - If grouping by month, extract the month from OrderDate in format YYYY-MM.
+            - Do not include headers or descriptions.
+            - If the data is not enough to answer, respond with: Insufficient data.
+            - Include key numbers or intermediate steps where relevant.
             `;
 
-            const result = await this.model.generateContent(prompt);
+            const result = await this.model.generateContent( prompt);
             const response = await result.response;
             return response.text();
         } catch (error) {
