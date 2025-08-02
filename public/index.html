@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis Chatbot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .chat-container { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            height: 500px; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .chat-messages { 
+            flex: 1; 
+            padding: 20px; 
+            overflow-y: auto; 
+            border-bottom: 1px solid #eee; 
+        }
+        .message { 
+            margin-bottom: 15px; 
+            padding: 10px 15px; 
+            border-radius: 10px; 
+            max-width: 70%; 
+        }
+        .user-message { 
+            background: #007bff; 
+            color: white; 
+            margin-left: auto; 
+        }
+        .bot-message { 
+            background: #f8f9fa; 
+            color: #333; 
+        }
+        .input-container { 
+            padding: 20px; 
+            display: flex; 
+            gap: 10px; 
+        }
+        .input-container input { 
+            flex: 1; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+        }
+        .input-container button { 
+            padding: 10px 20px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        .input-container button:hover { background: #0056b3; }
+        .data-upload { 
+            margin-bottom: 20px; 
+            padding: 20px; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Data Analysis Chatbot</h1>
+            <p>Phân tích dữ liệu thông minh với Google Gemini Pro</p>
+        </div>
+
+        <div class="data-upload">
+            <h3>Upload Data (Optional)</h3>
+            <textarea id="dataInput" placeholder="Paste your data here (JSON, CSV, or text format)..." rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+            <button onclick="generateInsights()" style="margin-top: 10px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Tạo Insights Tự Động
+            </button>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    Xin chào! Tôi là trợ lý phân tích dữ liệu. Bạn có thể:
+                    <br>• Upload dữ liệu và đặt câu hỏi
+                    <br>• Yêu cầu phân tích xu hướng
+                    <br>• Tạo insights tự động
+                    <br>• Hỏi về cách cải thiện dữ liệu
+                </div>
+            </div>
+            <div class="input-container">
+                <input type="text" id="messageInput" placeholder="Nhập câu hỏi của bạn..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Gửi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+            const dataInput = document.getElementById('dataInput');
+            
+            addMessage(message, 'user');
+            messageInput.value = '';
+            
+            addMessage('Đang phân tích...', 'bot', true);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message,
+                        data: dataInput.value.trim() || null
+                    })
+                });
+
+                const data = await response.json();
+                
+                removeLoadingMessage();
+                
+                if (data.error) {
+                    addMessage('Lỗi: ' + data.error, 'bot');
+                } else {
+                    addMessage(data.response, 'bot');
+                }
+            } catch (error) {
+                removeLoadingMessage();
+                addMessage('Có lỗi xảy ra khi kết nối đến server', 'bot');
+            }
+        }
+
+        async function generateInsights() {
+            const dataInput = document.getElementById('dataInput');
+            const data = dataInput.value.trim();
+            
+            if (!data) {
+                alert('Vui lòng nhập dữ liệu trước khi tạo insights');
+                return;
+            }
+
+            addMessage('Đang tạo insights...', 'bot', true);
+
+            try {
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(data);
+                } catch {
+                    parsedData = data;
+                }
+
+                const response = await fetch('/api/insights', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: parsedData })
+                });
+
+                const result = await response.json();
+                
+                removeLoadingMessage();
+                
+                if (result.error) {
+                    addMessage('Lỗi: ' + result.error, 'bot');
+                } else {
+                    addMessage('📊 **AUTO INSIGHTS:**\n\n' + result.insights, 'bot');
+                }
+            } catch (error) {
+                removeLoadingMessage();
+                addMessage('Có lỗi xảy ra khi tạo insights', 'bot');
+            }
+        }
+
+        function addMessage(text, sender, isLoading = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message ${isLoading ? 'loading' : ''}`;
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeLoadingMessage() {
+            const loadingMessage = document.querySelector('.loading');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
