@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import exportRoutes from './routes/exportRoutes';
 import { specs } from './config/swagger';
+import { testConnection } from './config/database';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,9 +79,13 @@ app.use((err: Error, _req: Request, res: Response, _next: Function) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
   console.log(`📚 Swagger Documentation: http://localhost:${PORT}/api-docs`);
+  
+  // Test database connection
+  await testConnection();
+  
   console.log(`📝 API Documentation:`);
   console.log(`   GET /api/health - Health check`);
   console.log(`   POST /api/export/direct - Direct export PDF file with charts`);

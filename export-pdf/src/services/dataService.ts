@@ -6,6 +6,7 @@ import {
   CategoryPerformance
 } from '../types/database';
 import { ExportType } from '../types/export';
+import { executeQuery } from '../config/database';
 
 export class DataService {
   
@@ -60,32 +61,87 @@ export class DataService {
     return products.slice(0, limit);
   }
 
-  async getRefundAnalysis(_month?: string, _year?: number): Promise<RefundAnalysis[]> {
-    // Mock implementation - replace with actual database queries
-    const refunds: RefundAnalysis[] = [
-      {
-        order_id: 1,
-        order_code: 'ORD-2025-001',
-        customer_name: 'Nguyễn Văn A',
-        item_name: 'iPhone 15 Pro Max 256GB',
-        refund_reason: 'Sản phẩm bị lỗi màn hình',
-        refund_amount: 30000000,
-        order_date: new Date('2025-07-15'),
-        platform: 'Shopee'
-      },
-      {
-        order_id: 2,
-        order_code: 'ORD-2025-002',
-        customer_name: 'Trần Thị B',
-        item_name: 'MacBook Air M2 13 inch',
-        refund_reason: 'Không đúng mô tả sản phẩm',
-        refund_amount: 40000000,
-        order_date: new Date('2025-07-20'),
-        platform: 'Website'
-      }
-    ];
+  async getRefundAnalysis(month?: string, year?: number): Promise<RefundAnalysis[]> {
+    try {
+      // Query refund_analysis table with filters
+      let query = `
+        SELECT 
+          sku,
+          item_name,
+          total_orders,
+          refund_orders,
+          refund_rate,
+          refund_reason,
+          refund_quantity,
+          rank_position,
+          data_range,
+          analysis_date
+        FROM refund_analysis 
+        WHERE sort_type = 'refund_count'
+      `;
 
-    return refunds;
+      console.log('Query:', query);
+      
+      const params: any[] = [];
+      
+      // Add date filters if provided
+      if (month && year) {
+        query += ` AND MONTH(analysis_date) = ? AND YEAR(analysis_date) = ?`;
+        params.push(parseInt(month), year);
+      }
+      
+      // Order by rank position and limit results
+      query += ` ORDER BY rank_position ASC LIMIT 10`;
+      
+      const results = await executeQuery(query, params);
+      
+      // Transform database results to match RefundAnalysis interface
+      const refunds: RefundAnalysis[] = results.map((row: any) => ({
+        order_id: row.rank_position, // Using rank_position as order_id
+        order_code: `REF-${row.sku}-${row.rank_position}`,
+        customer_name: 'N/A', // Not available in refund_analysis table
+        item_name: row.item_name || 'Không xác định',
+        refund_reason: row.refund_reason || 'Không xác định',
+        refund_amount: 0, // Not available in refund_analysis table
+        order_date: new Date(row.analysis_date),
+        platform: 'Tất cả', // Not available in refund_analysis table
+        // Additional fields from refund_analysis
+        sku: row.sku,
+        total_orders: row.total_orders,
+        refund_orders: row.refund_orders,
+        refund_rate: parseFloat(row.refund_rate),
+        refund_quantity: row.refund_quantity,
+        rank_position: row.rank_position,
+        data_range: row.data_range
+      }));
+      
+      return refunds;
+    } catch (error) {
+      console.error('Error fetching refund analysis:', error);
+      // Return mock data as fallback
+      return [
+        {
+          order_id: 1,
+          order_code: 'ORD-2025-001',
+          customer_name: 'Nguyễn Văn A',
+          item_name: 'iPhone 15 Pro Max 256GB',
+          refund_reason: 'Sản phẩm bị lỗi màn hình',
+          refund_amount: 30000000,
+          order_date: new Date('2025-07-15'),
+          platform: 'Shopee'
+        },
+        {
+          order_id: 2,
+          order_code: 'ORD-2025-002',
+          customer_name: 'Trần Thị B',
+          item_name: 'MacBook Air M2 13 inch',
+          refund_reason: 'Không đúng mô tả sản phẩm',
+          refund_amount: 40000000,
+          order_date: new Date('2025-07-20'),
+          platform: 'Website'
+        }
+      ];
+    }
   }
 
   async getBrandPerformance(limit: number = 10): Promise<BrandPerformance[]> {

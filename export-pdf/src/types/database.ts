@@ -140,6 +140,14 @@ export interface RefundAnalysis {
   refund_amount: number;
   order_date: Date;
   platform: string;
+  // Additional fields from refund_analysis table
+  sku?: string;
+  total_orders?: number;
+  refund_orders?: number;
+  refund_rate?: number;
+  refund_quantity?: number;
+  rank_position?: number;
+  data_range?: string;
 }
 
 export interface BrandPerformance {
