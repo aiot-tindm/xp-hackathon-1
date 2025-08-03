@@ -29,9 +29,12 @@ class GeminiService {
                     🔍 Output format requirements:
                         1. Insight (human-style conclusion):
                             - Provide a short, natural language summary or insight.
-                            - Do not use key-value pairs here.
+                            - Do NOT use key-value pairs here.
                             - Keep it professional and business-oriented.
-                        2. Then provide **supporting key-value pairs**, in this format:
+
+                        2. Reference (optional):
+                            - Only include this section if the question relates to: sales performance, revenue, top-selling products, or top-performing brands...
+                            - Do NOT include this section for planning, strategy, or recommendation-style questions.
                             - Respond using only "key: value"
                             - One key-value pair per line
                             - Do not return explanations or free text
