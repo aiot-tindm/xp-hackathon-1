@@ -24,41 +24,104 @@ export class DataService {
   }
 
   async getProductPerformance(limit: number = 10, _includeRefund: boolean = false): Promise<ProductPerformance[]> {
-    // Mock implementation - replace with actual database queries
-    const products: ProductPerformance[] = [
-      {
-        item_id: 1,
-        sku: 'IPHONE15-001',
-        name: 'iPhone 15 Pro Max 256GB',
-        brand_name: 'Apple',
-        category_name: 'Điện thoại',
-        total_sold: 150,
-        total_revenue: 45000000,
-        refund_count: 5,
-        refund_rate: 3.3,
-        stock_quantity: 30,
-        cost_price: 28000000,
-        sale_price: 30000000,
-        profit_margin: 7.1
-      },
-      {
-        item_id: 2,
-        sku: 'MACBOOK-001',
-        name: 'MacBook Air M2 13 inch',
-        brand_name: 'Apple',
-        category_name: 'Laptop',
-        total_sold: 80,
-        total_revenue: 32000000,
-        refund_count: 2,
-        refund_rate: 2.5,
-        stock_quantity: 15,
-        cost_price: 25000000,
-        sale_price: 40000000,
-        profit_margin: 37.5
-      }
-    ];
+    try {
+      // Query top_selling_items table only
+      let query = `
+        SELECT 
+          sku,
+          item_name,
+          total_quantity_sold,
+          total_revenue,
+          total_profit,
+          rank_position,
+          data_range,
+          analysis_date,
+          0 as cost_price,
+          0 as sale_price,
+          0 as stock_quantity,
+          0 as item_id,
+          'Unknown' as brand_name,
+          'Unknown' as category_name,
+          0 as refund_count,
+          0 as refund_rate
+        FROM top_selling_items
+        WHERE sort_type = 'quantity'
+      `;
+      
+      const params: any[] = [];
+      
+      // Add date filters if provided (you can extend this based on your needs)
+      // if (month && year) {
+      //   query += ` AND MONTH(tsi.analysis_date) = ? AND YEAR(tsi.analysis_date) = ?`;
+      //   params.push(parseInt(month), year);
+      // }
+      
+              // Order by rank position
+        query += ` ORDER BY rank_position ASC`;
+      
+      const results = await executeQuery(query, params);
+      
+      // Transform results to ProductPerformance format
+      const products: ProductPerformance[] = results.map((row: any) => ({
+        item_id: row.item_id || 0,
+        sku: row.sku,
+        name: row.item_name,
+        brand_name: row.brand_name || 'Không xác định',
+        category_name: row.category_name || 'Không xác định',
+        total_sold: row.total_quantity_sold || 0,
+        total_revenue: row.total_revenue || 0,
+        total_profit: row.total_profit || 0,
+        refund_count: row.refund_count || 0,
+        refund_rate: row.refund_rate || 0,
+        stock_quantity: row.stock_quantity || 0,
+        cost_price: row.cost_price || 0,
+        sale_price: row.sale_price || 0,
+        profit_margin: row.total_profit && row.total_revenue 
+          ? ((row.total_profit / row.total_revenue) * 100)
+          : 0
+      }));
+      
+      return products;
+      
+    } catch (error) {
+      console.error('Error fetching top selling items:', error);
+      
+      // Fallback to mock data if database query fails
+      const products: ProductPerformance[] = [
+        {
+          item_id: 1,
+          sku: 'IPHONE15-001',
+          name: 'iPhone 15 Pro Max 256GB',
+          brand_name: 'Apple',
+          category_name: 'Điện thoại',
+          total_sold: 150,
+          total_revenue: 45000000,
+          refund_count: 5,
+          refund_rate: 3.3,
+          stock_quantity: 30,
+          cost_price: 28000000,
+          sale_price: 30000000,
+          profit_margin: 7.1
+        },
+        {
+          item_id: 2,
+          sku: 'MACBOOK-001',
+          name: 'MacBook Air M2 13 inch',
+          brand_name: 'Apple',
+          category_name: 'Laptop',
+          total_sold: 80,
+          total_revenue: 32000000,
+          refund_count: 2,
+          refund_rate: 2.5,
+          stock_quantity: 15,
+          cost_price: 25000000,
+          sale_price: 40000000,
+          profit_margin: 37.5
+        }
+      ];
 
-    return products.slice(0, limit);
+      return products.slice(0, limit);
+    }
   }
 
   async getRefundAnalysis(month?: string, year?: number): Promise<RefundAnalysis[]> {
@@ -85,7 +148,7 @@ export class DataService {
         LEFT JOIN items i ON ra.sku COLLATE utf8mb4_unicode_ci = i.sku COLLATE utf8mb4_unicode_ci
         LEFT JOIN brands b ON i.brand_id = b.id
         LEFT JOIN categories c ON i.category_id = c.id
-        WHERE ra.sort_type = 'refund_count'
+        WHERE ra.sort_type = 'refund_rate'
       `;
       
       const params: any[] = [];

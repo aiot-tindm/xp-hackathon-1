@@ -78,7 +78,7 @@ export class ExportService {
 
   private prepareExportResult(data: any, params: ExportParams): ExportResult {
     const titles = {
-      best_seller: 'Báo cáo hàng bán chạy',
+      best_seller: 'Báo cáo sản phẩm bán chạy',
       refund: 'Báo cáo hàng bị refund nhiều',
       refund_reason: 'Báo cáo lý do refund',
       revenue: 'Báo cáo doanh số chung',
@@ -164,13 +164,24 @@ export class ExportService {
       case 'best_seller':
         // Bar chart for best selling products
         const bestSellerData = data.slice(0, 10).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.sold || item.total_sold || item.count || 0
+          name: item.name || item.item_name || `Sản phẩm ${index + 1}`,
+          value: item.total_sold || item.sold || item.count || 0
         }));
         charts.push({
           type: 'bar',
-          title: 'Top sản phẩm bán chạy',
+          title: 'Top sản phẩm bán chạy (Số lượng)',
           data: bestSellerData
+        });
+        
+        // Revenue chart for best selling products
+        const bestSellerRevenueData = data.slice(0, 10).map((item: any, index: number) => ({
+          name: item.name || item.item_name || `Sản phẩm ${index + 1}`,
+          value: item.total_revenue || item.revenue || 0
+        }));
+        charts.push({
+          type: 'horizontal_bar',
+          title: 'Doanh thu theo sản phẩm (VNĐ)',
+          data: bestSellerRevenueData
         });
         break;
 

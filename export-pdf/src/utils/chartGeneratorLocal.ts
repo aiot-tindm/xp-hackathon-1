@@ -64,6 +64,9 @@ export class ChartGenerator {
   }
 
   static async getHorizontalBarChartBuffer(labels: string[], data: number[], title: string): Promise<Buffer> {
+    // Check if this is a revenue chart (contains VNĐ in title)
+    const isRevenueChart = title.includes('VNĐ') || title.includes('Doanh thu');
+    
     return canvasRenderService.renderToBuffer({
       type: 'bar',
       data: {
@@ -71,8 +74,8 @@ export class ChartGenerator {
         datasets: [{
           label: title,
           data,
-          backgroundColor: 'rgba(231, 76, 60, 0.8)',
-          borderColor: '#c0392b',
+          backgroundColor: isRevenueChart ? 'rgba(46, 204, 113, 0.8)' : 'rgba(231, 76, 60, 0.8)',
+          borderColor: isRevenueChart ? '#27ae60' : '#c0392b',
           borderWidth: 1,
           maxBarThickness: 30 * scale
         }]
@@ -87,12 +90,41 @@ export class ChartGenerator {
             display: true,
             text: title,
             padding: { top: 10 * scale, bottom: 20 * scale }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context: any) {
+                const value = context.parsed.x;
+                if (isRevenueChart) {
+                  if (value >= 1000000) {
+                    return `${context.dataset.label}: ${(value / 1000000).toFixed(1)} Triệu VNĐ`;
+                  } else if (value >= 1000) {
+                    return `${context.dataset.label}: ${(value / 1000).toFixed(0)} Nghìn VNĐ`;
+                  }
+                  return `${context.dataset.label}: ${value.toLocaleString('vi-VN')} VNĐ`;
+                }
+                return `${context.dataset.label}: ${value}`;
+              }
+            }
           }
         },
         scales: {
           x: {
             beginAtZero: true,
-            grid: { color: '#bdc3c7' }
+            grid: { color: '#bdc3c7' },
+            ticks: {
+              callback: function(value: any) {
+                if (isRevenueChart) {
+                  if (value >= 1000000) {
+                    return (value / 1000000).toFixed(1) + ' Triệu';
+                  } else if (value >= 1000) {
+                    return (value / 1000).toFixed(0) + ' Nghìn';
+                  }
+                  return value + ' VNĐ';
+                }
+                return value;
+              }
+            }
           },
           y: {
             ticks: { font: { size: 12 * scale } },
