@@ -64,6 +64,20 @@ const exportService = new ExportService();
  *                 limit: 15
  *                 format: "pdf"
  *                 language: "vi"
+ *             category:
+ *               summary: Phân tích theo danh mục sản phẩm
+ *               value:
+ *                 type: "category"
+ *                 limit: 10
+ *                 format: "pdf"
+ *                 language: "vi"
+ *             brand:
+ *               summary: Phân tích theo thương hiệu
+ *               value:
+ *                 type: "brand"
+ *                 limit: 10
+ *                 format: "pdf"
+ *                 language: "vi"
  *             all_charts:
  *               summary: Báo cáo tổng hợp tất cả biểu đồ
  *               value:
@@ -156,6 +170,81 @@ const exportService = new ExportService();
  *                       }
  *                     ]
  *                   processing_time: 2500
+ *                   status: "success"
+ *               category_success:
+ *                 summary: Báo cáo theo danh mục thành công
+ *                 value:
+ *                   success: true
+ *                   message: "Xuất báo cáo PDF với biểu đồ thành công"
+ *                   data:
+ *                     title: "Báo cáo phân tích theo danh mục"
+ *                     subtitle: "Phân tích doanh thu và số lượng theo danh mục"
+ *                     period: "Tất cả thời gian"
+ *                     total_records: 10
+ *                     export_type: "category"
+ *                     charts: [
+ *                       {
+ *                         type: "horizontal_bar",
+ *                         title: "Doanh thu theo danh mục (VNĐ)",
+ *                         data: []
+ *                       },
+ *                       {
+ *                         type: "bar",
+ *                         title: "Số lượng bán theo danh mục",
+ *                         data: []
+ *                       }
+ *                     ]
+ *                   processing_time: 1800
+ *                   status: "success"
+ *               brand_success:
+ *                 summary: Báo cáo theo thương hiệu thành công
+ *                 value:
+ *                   success: true
+ *                   message: "Xuất báo cáo PDF với biểu đồ thành công"
+ *                   data:
+ *                     title: "Báo cáo phân tích theo thương hiệu"
+ *                     subtitle: "Phân tích doanh thu và số lượng theo thương hiệu"
+ *                     period: "Tất cả thời gian"
+ *                     total_records: 10
+ *                     export_type: "brand"
+ *                     charts: [
+ *                       {
+ *                         type: "horizontal_bar",
+ *                         title: "Doanh thu theo thương hiệu (VNĐ)",
+ *                         data: []
+ *                       },
+ *                       {
+ *                         type: "bar",
+ *                         title: "Số lượng bán theo thương hiệu",
+ *                         data: []
+ *                       }
+ *                     ]
+ *                   processing_time: 1800
+ *                   status: "success"
+ *               slow_moving_success:
+ *                 summary: Báo cáo hàng ế thành công
+ *                 value:
+ *                   success: true
+ *                   message: "Xuất báo cáo PDF với biểu đồ thành công"
+ *                   data:
+ *                     title: "Báo cáo hàng ế"
+ *                     subtitle: "Phân tích hàng tồn kho chậm luân chuyển"
+ *                     period: "Tất cả thời gian"
+ *                     total_records: 15
+ *                     export_type: "slow_moving"
+ *                     charts: [
+ *                       {
+ *                         type: "horizontal_bar",
+ *                         title: "Hàng tồn kho ế (Số lượng)",
+ *                         data: []
+ *                       },
+ *                       {
+ *                         type: "bar",
+ *                         title: "Số lượng đã bán của hàng ế",
+ *                         data: []
+ *                       }
+ *                     ]
+ *                   processing_time: 2000
  *                   status: "success"
  *       400:
  *         description: Tham số không hợp lệ

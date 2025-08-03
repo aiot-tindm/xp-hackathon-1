@@ -34,7 +34,7 @@ const options = {
           properties: {
             type: {
               type: 'string',
-              enum: ['best_seller', 'refund', 'refund_reason', 'revenue', 'slow_moving', 'all'],
+              enum: ['best_seller', 'refund', 'refund_reason', 'revenue', 'category', 'brand', 'slow_moving', 'all'],
               description: 'Loại export để tạo báo cáo PDF với biểu đồ tương ứng'
             },
             platform: {

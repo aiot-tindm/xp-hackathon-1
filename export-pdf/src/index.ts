@@ -93,9 +93,11 @@ app.listen(PORT, async () => {
   console.log(`       • best_seller - Hàng bán chạy`);
   console.log(`       • refund - Hàng bị refund nhiều`);
   console.log(`       • refund_reason - Lý do refund`);
-  console.log(`       • revenue - Doanh số chung`);
+  console.log(`       • revenue - Doanh thu theo ngày`);
+  console.log(`       • category - Phân tích theo danh mục`);
+  console.log(`       • brand - Phân tích theo thương hiệu`);
   console.log(`       • slow_moving - Hàng ế`);
-  console.log(`       • all - Tất cả biểu đồ (default)`);
+  console.log(`       • all - Tất cả biểu đồ tổng hợp`);
 });
 
 export default app; 
