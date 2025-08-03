@@ -6,7 +6,7 @@
  *   schemas:
  *     ExportType:
  *       type: string
- *       enum: [best_seller, refund, refund_reason, revenue, slow_moving, all]
+ *       enum: [best_seller, refund, refund_reason, revenue, category, brand, slow_moving, all]
  *       description: Các loại export được hỗ trợ
  */
 export type ExportType = 
@@ -14,7 +14,9 @@ export type ExportType =
   | 'refund'           // 2. Hàng bị refund nhiều
   | 'refund_reason'    // 3. Lý do refund
   | 'revenue'          // 4. Doanh số chung
-  | 'slow_moving'      // 5. Hàng ế
+  | 'category'         // 5. Phân tích theo danh mục
+  | 'brand'            // 6. Phân tích theo thương hiệu
+  | 'slow_moving'      // 7. Hàng ế
   | 'all';             // Default: Tất cả biểu đồ
 
 /**

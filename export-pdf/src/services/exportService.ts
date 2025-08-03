@@ -82,6 +82,8 @@ export class ExportService {
       refund: 'Báo cáo hàng bị refund nhiều',
       refund_reason: 'Báo cáo phân tích lý do refund',
       revenue: 'Báo cáo doanh thu theo ngày',
+      category: 'Báo cáo phân tích theo danh mục',
+      brand: 'Báo cáo phân tích theo thương hiệu',
       slow_moving: 'Báo cáo hàng ế',
       all: 'Báo cáo tổng hợp tất cả biểu đồ'
     };
@@ -232,6 +234,54 @@ export class ExportService {
           type: 'bar',
           title: 'Số đơn hàng theo ngày',
           data: dailyOrdersData
+        });
+        break;
+
+      case 'category':
+        // Bar chart for category revenue
+        const categoryRevenueData = data.slice(0, 10).map((item: any) => ({
+          name: item.category_name || 'Không xác định',
+          value: item.total_revenue || 0
+        }));
+        charts.push({
+          type: 'horizontal_bar',
+          title: 'Doanh thu theo danh mục (VNĐ)',
+          data: categoryRevenueData
+        });
+
+        // Bar chart for category quantity
+        const categoryQuantityData = data.slice(0, 10).map((item: any) => ({
+          name: item.category_name || 'Không xác định',
+          value: item.total_quantity_sold || 0
+        }));
+        charts.push({
+          type: 'bar',
+          title: 'Số lượng bán theo danh mục',
+          data: categoryQuantityData
+        });
+        break;
+
+      case 'brand':
+        // Horizontal bar chart for brand revenue
+        const brandRevenueData = data.slice(0, 10).map((item: any) => ({
+          name: item.brand_name || 'Không xác định',
+          value: item.total_revenue || 0
+        }));
+        charts.push({
+          type: 'horizontal_bar',
+          title: 'Doanh thu theo thương hiệu (VNĐ)',
+          data: brandRevenueData
+        });
+
+        // Bar chart for brand quantity
+        const brandQuantityData = data.slice(0, 10).map((item: any) => ({
+          name: item.brand_name || 'Không xác định',
+          value: item.total_quantity_sold || 0
+        }));
+        charts.push({
+          type: 'bar',
+          title: 'Số lượng bán theo thương hiệu',
+          data: brandQuantityData
         });
         break;
 

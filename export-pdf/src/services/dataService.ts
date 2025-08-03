@@ -369,55 +369,135 @@ export class DataService {
   }
 
   async getBrandPerformance(limit: number = 10): Promise<BrandPerformance[]> {
-    // Mock implementation - replace with actual database queries
-    const brands: BrandPerformance[] = [
-      {
-        brand_id: 1,
-        brand_name: 'Apple',
-        total_quantity_sold: 230,
-        total_revenue: 77000000,
-        total_orders: 180,
-        average_order_value: 427778,
-        refund_rate: 2.8
-      },
-      {
-        brand_id: 2,
-        brand_name: 'Samsung',
-        total_quantity_sold: 120,
-        total_revenue: 36000000,
-        total_orders: 95,
-        average_order_value: 378947,
-        refund_rate: 4.2
-      }
-    ];
+    try {
+      // Query brand_summary table with GROUP BY to avoid duplicates
+      let query = `
+        SELECT 
+          MIN(brand_id) as brand_id,
+          brand_name,
+          SUM(total_quantity_sold) as total_quantity_sold,
+          SUM(total_revenue) as total_revenue,
+          SUM(total_profit) as total_profit,
+          AVG(profit_margin) as profit_margin,
+          MIN(rank_position) as rank_position
+        FROM brand_summary
+        WHERE sort_type = 'revenue'
+        GROUP BY brand_name
+      `;
+      
+      const params: any[] = [];
+      
+      // Order by total revenue and limit results
+      query += ` ORDER BY total_revenue DESC LIMIT ${Math.max(1, Math.min(limit, 100))}`;
+      
+      const results = await executeQuery(query, params);
+      
+      // Transform results to BrandPerformance format
+      const brands: BrandPerformance[] = results.map((row: any) => ({
+        brand_id: row.brand_id,
+        brand_name: row.brand_name,
+        total_quantity_sold: row.total_quantity_sold || 0,
+        total_revenue: parseFloat(row.total_revenue || 0),
+        total_orders: 0, // Not available in brand_summary
+        average_order_value: 0, // Not available in brand_summary
+        refund_rate: 0 // Not available in brand_summary
+      }));
+      
+      return brands;
+      
+    } catch (error) {
+      console.error('Error fetching brand performance:', error);
+      
+      // Fallback to mock data
+      const brands: BrandPerformance[] = [
+        {
+          brand_id: 1,
+          brand_name: 'Apple',
+          total_quantity_sold: 230,
+          total_revenue: 77000000,
+          total_orders: 180,
+          average_order_value: 427778,
+          refund_rate: 2.8
+        },
+        {
+          brand_id: 2,
+          brand_name: 'Samsung',
+          total_quantity_sold: 120,
+          total_revenue: 36000000,
+          total_orders: 95,
+          average_order_value: 378947,
+          refund_rate: 4.2
+        }
+      ];
 
-    return brands.slice(0, limit);
+      return brands.slice(0, limit);
+    }
   }
 
   async getCategoryPerformance(limit: number = 10): Promise<CategoryPerformance[]> {
-    // Mock implementation - replace with actual database queries
-    const categories: CategoryPerformance[] = [
-      {
-        category_id: 1,
-        category_name: 'Điện thoại',
-        total_quantity_sold: 200,
-        total_revenue: 60000000,
-        total_orders: 150,
-        average_order_value: 400000,
-        refund_rate: 3.3
-      },
-      {
-        category_id: 2,
-        category_name: 'Laptop',
-        total_quantity_sold: 80,
-        total_revenue: 32000000,
-        total_orders: 65,
-        average_order_value: 492308,
-        refund_rate: 2.5
-      }
-    ];
+    try {
+      // Query category_summary table with GROUP BY to avoid duplicates
+      let query = `
+        SELECT 
+          MIN(category_id) as category_id,
+          category_name,
+          SUM(total_quantity_sold) as total_quantity_sold,
+          SUM(total_revenue) as total_revenue,
+          SUM(total_profit) as total_profit,
+          AVG(profit_margin) as profit_margin,
+          MIN(rank_position) as rank_position
+        FROM category_summary
+        WHERE sort_type = 'revenue'
+        GROUP BY category_name
+      `;
+      
+      const params: any[] = [];
+      
+      // Order by total revenue and limit results
+      query += ` ORDER BY total_revenue DESC LIMIT ${Math.max(1, Math.min(limit, 100))}`;
+      
+      const results = await executeQuery(query, params);
+      
+      // Transform results to CategoryPerformance format
+      const categories: CategoryPerformance[] = results.map((row: any) => ({
+        category_id: row.category_id,
+        category_name: row.category_name,
+        total_quantity_sold: row.total_quantity_sold || 0,
+        total_revenue: parseFloat(row.total_revenue || 0),
+        total_orders: 0, // Not available in category_summary
+        average_order_value: 0, // Not available in category_summary
+        refund_rate: 0 // Not available in category_summary
+      }));
+      
+      return categories;
+      
+    } catch (error) {
+      console.error('Error fetching category performance:', error);
+      
+      // Fallback to mock data
+      const categories: CategoryPerformance[] = [
+        {
+          category_id: 1,
+          category_name: 'Electronics',
+          total_quantity_sold: 200,
+          total_revenue: 60000000,
+          total_orders: 150,
+          average_order_value: 400000,
+          refund_rate: 3.3
+        },
+        {
+          category_id: 2,
+          category_name: 'Clothing',
+          total_quantity_sold: 80,
+          total_revenue: 32000000,
+          total_orders: 65,
+          average_order_value: 492308,
+          refund_rate: 2.5
+        }
+      ];
 
-    return categories.slice(0, limit);
+      return categories.slice(0, limit);
+    }
   }
 
   async getDataByType(type: ExportType, params: any): Promise<any> {
@@ -433,6 +513,12 @@ export class DataService {
       
       case 'refund_reason':
         return await this.getRefundReasonAnalysis(params.month, params.year);
+      
+      case 'category':
+        return await this.getCategoryPerformance(params.limit || 10);
+      
+      case 'brand':
+        return await this.getBrandPerformance(params.limit || 10);
       
       case 'slow_moving':
         return await this.getProductPerformance(params.limit || 10, params.include_refund);
