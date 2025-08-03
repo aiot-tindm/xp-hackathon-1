@@ -3,11 +3,11 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Cài đặt các dependencies
-COPY ../requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy mã nguồn
-COPY . .
+COPY api-server .
 
 # Expose port
 EXPOSE 5000
