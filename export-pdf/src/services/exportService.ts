@@ -286,15 +286,26 @@ export class ExportService {
         break;
 
       case 'slow_moving':
-        // Bar chart for slow moving inventory
-        const slowMovingData = data.slice(0, 10).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.stock || item.inventory || item.remaining || 0
+        // Horizontal bar chart for slow moving products (stock quantity)
+        const slowMovingStockData = data.slice(0, 10).map((item: any) => ({
+          name: item.name || 'Unknown Product',
+          value: item.stock_quantity || 0
+        }));
+        charts.push({
+          type: 'horizontal_bar',
+          title: 'Hàng tồn kho ế (Số lượng)',
+          data: slowMovingStockData
+        });
+
+        // Bar chart for slow moving products (total sold)
+        const slowMovingSoldData = data.slice(0, 10).map((item: any) => ({
+          name: item.name || 'Unknown Product',
+          value: item.total_sold || 0
         }));
         charts.push({
           type: 'bar',
-          title: 'Hàng tồn kho chậm luân chuyển',
-          data: slowMovingData
+          title: 'Số lượng đã bán của hàng ế',
+          data: slowMovingSoldData
         });
         break;
 

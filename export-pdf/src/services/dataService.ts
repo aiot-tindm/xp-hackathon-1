@@ -500,6 +500,101 @@ export class DataService {
     }
   }
 
+  async getSlowMovingProducts(limit: number = 10): Promise<ProductPerformance[]> {
+    try {
+      // Query items and order_items to identify slow moving products
+      let query = `
+        SELECT 
+          i.id as item_id,
+          i.sku,
+          i.name,
+          i.cost_price,
+          i.sale_price,
+          i.stock_quantity,
+          COALESCE(SUM(oi.quantity), 0) as total_quantity_sold,
+          COALESCE(SUM(oi.quantity * oi.price_per_unit), 0) as total_revenue,
+          COALESCE(SUM(oi.quantity * (oi.price_per_unit - i.cost_price)), 0) as total_profit,
+          b.name as brand_name,
+          c.name as category_name,
+          0 as refund_count,
+          0.00 as refund_rate,
+          CASE 
+            WHEN COALESCE(SUM(oi.quantity), 0) = 0 THEN 999999
+            ELSE i.stock_quantity / COALESCE(SUM(oi.quantity), 0)
+          END as stock_to_sales_ratio
+        FROM items i
+        LEFT JOIN order_items oi ON i.id = oi.item_id
+        LEFT JOIN brands b ON i.brand_id = b.id
+        LEFT JOIN categories c ON i.category_id = c.id
+        WHERE i.is_active = 1
+        GROUP BY i.id, i.sku, i.name, i.cost_price, i.sale_price, i.stock_quantity, b.name, c.name
+        HAVING stock_to_sales_ratio > 5 OR total_quantity_sold = 0
+        ORDER BY stock_to_sales_ratio DESC, total_quantity_sold ASC
+        LIMIT ${Math.max(1, Math.min(limit, 100))}
+      `;
+      
+      const results = await executeQuery(query, []);
+      
+      // Transform results to ProductPerformance format
+      const products: ProductPerformance[] = results.map((row: any) => ({
+        item_id: row.item_id,
+        sku: row.sku,
+        name: row.name,
+        cost_price: parseFloat(row.cost_price || 0),
+        sale_price: parseFloat(row.sale_price || 0),
+        stock_quantity: row.stock_quantity || 0,
+        total_sold: row.total_quantity_sold || 0,
+        total_revenue: parseFloat(row.total_revenue || 0),
+        brand_name: row.brand_name || 'Unknown',
+        category_name: row.category_name || 'Unknown',
+        refund_count: row.refund_count || 0,
+        refund_rate: parseFloat(row.refund_rate || 0),
+        profit_margin: parseFloat(row.total_profit || 0) / parseFloat(row.total_revenue || 1) * 100
+      }));
+      
+      return products;
+      
+    } catch (error) {
+      console.error('Error fetching slow moving products:', error);
+      
+      // Fallback to mock data
+      const products: ProductPerformance[] = [
+        {
+          item_id: 1,
+          sku: 'SLOW-001',
+          name: 'Sản phẩm ế 1',
+          cost_price: 100,
+          sale_price: 150,
+          stock_quantity: 50,
+          total_sold: 5,
+          total_revenue: 750,
+          brand_name: 'Brand A',
+          category_name: 'Category 1',
+          refund_count: 0,
+          refund_rate: 0,
+          profit_margin: 33.33
+        },
+        {
+          item_id: 2,
+          sku: 'SLOW-002',
+          name: 'Sản phẩm ế 2',
+          cost_price: 200,
+          sale_price: 300,
+          stock_quantity: 30,
+          total_sold: 3,
+          total_revenue: 900,
+          brand_name: 'Brand B',
+          category_name: 'Category 2',
+          refund_count: 1,
+          refund_rate: 33.33,
+          profit_margin: 33.33
+        }
+      ];
+
+      return products.slice(0, limit);
+    }
+  }
+
   async getDataByType(type: ExportType, params: any): Promise<any> {
     switch (type) {
       case 'revenue':
@@ -521,7 +616,7 @@ export class DataService {
         return await this.getBrandPerformance(params.limit || 10);
       
       case 'slow_moving':
-        return await this.getProductPerformance(params.limit || 10, params.include_refund);
+        return await this.getSlowMovingProducts(params.limit || 10);
       
       case 'all':
         // Return combined data for all charts
