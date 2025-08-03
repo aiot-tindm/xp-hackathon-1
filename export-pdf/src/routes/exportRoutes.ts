@@ -192,10 +192,6 @@ router.post('/direct', async (req: Request, res: Response) => {
       });
     }
 
-    console.log('📝 Received direct export request:', { 
-      type, platform, month, year, quarter, include_refund, limit, format, language 
-    });
-
     const result = await exportService.exportDataDirect({
       type,
       platform,

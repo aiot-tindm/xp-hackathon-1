@@ -21,8 +21,6 @@ export class ExportService {
     const startTime = Date.now();
     
     try {
-      console.log('📝 Direct export request:', request);
-      
       // Step 1: Prepare export parameters directly from request
       const exportParams: ExportParams = {
         type: request.type,
@@ -36,13 +34,9 @@ export class ExportService {
         format: request.format || 'pdf'
       };
 
-      console.log('⚙️ Direct export parameters:', exportParams);
-
       // Step 2: Get data based on type
       const data = await this.dataService.getDataByType(exportParams.type, exportParams);
       
-      console.log('📈 Data retrieved, records:', Array.isArray(data) ? data.length : 1);
-
       // Step 3: Prepare export result
       const exportResult: ExportResult = this.prepareExportResult(data, exportParams);
 
