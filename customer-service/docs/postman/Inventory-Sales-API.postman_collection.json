@@ -1,0 +1,638 @@
+{
+  "info": {
+    "name": "Customer Analytics & Inventory Management API",
+    "description": "Complete API collection for Customer Analytics & Inventory Management System with 6 specialized Customer Analytics APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Customer Analytics APIs",
+      "description": "6 specialized Customer Analytics APIs for comprehensive customer analysis",
+      "item": [
+        {
+          "name": "1. Customer Analytics Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers?page=1&limit=10&businessType=default",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "businessType",
+                  "value": "default",
+                  "description": "Business type for segmentation"
+                }
+              ]
+            },
+            "description": "Get comprehensive customer analytics overview with segmentation and filters"
+          }
+        },
+        {
+          "name": "2. Individual Customer Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers/1?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers", "1"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30",
+                  "description": "Days for trend analysis"
+                }
+              ]
+            },
+            "description": "Get detailed analysis of a specific customer"
+          }
+        },
+        {
+          "name": "3. Customer Predictions & Trends",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerIds\": [1, 2, 3],\n  \"includeRecommendations\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers/predictions",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers", "predictions"]
+            },
+            "description": "Get CLV predictions, churn risk, and product recommendations for customers"
+          }
+        },
+        {
+          "name": "4. Customer RFM Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers/rfm?businessType=default",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers", "rfm"],
+              "query": [
+                {
+                  "key": "businessType",
+                  "value": "default",
+                  "description": "Business type for RFM thresholds"
+                }
+              ]
+            },
+            "description": "Analyze customers using Recency, Frequency, Monetary scoring"
+          }
+        },
+        {
+          "name": "5. Customer Churn Prediction",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers/churn-prediction?days=90&businessType=default",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers", "churn-prediction"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "90",
+                  "description": "Days threshold for churn prediction"
+                },
+                {
+                  "key": "businessType",
+                  "value": "default",
+                  "description": "Business type for churn thresholds"
+                }
+              ]
+            },
+            "description": "Predict which customers are likely to churn"
+          }
+        },
+        {
+          "name": "6. Potential Customer Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers/new-inventory-matching?productIds=1,2&categoryIds=1&limit=10&businessType=default",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers", "new-inventory-matching"],
+              "query": [
+                {
+                  "key": "productIds",
+                  "value": "1,2",
+                  "description": "Comma-separated product IDs"
+                },
+                {
+                  "key": "categoryIds",
+                  "value": "1",
+                  "description": "Comma-separated category IDs"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of customers to return"
+                },
+                {
+                  "key": "businessType",
+                  "value": "default",
+                  "description": "Business type for scoring"
+                }
+              ]
+            },
+            "description": "Find customers interested in specific products or categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Core Business APIs",
+      "description": "Core business APIs for inventory and sales management",
+      "item": [
+        {
+          "name": "Brands Management",
+          "item": [
+            {
+              "name": "Get All Brands",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/brands?page=1&limit=10&search=apple",
+              "host": ["{{baseUrl}}"],
+                  "path": ["brands"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                      "value": "apple"
+                }
+              ]
+            },
+                "description": "Get all brands with pagination and search"
+          }
+        },
+        {
+              "name": "Get Single Brand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/brands/1",
+              "host": ["{{baseUrl}}"],
+                  "path": ["brands", "1"]
+            },
+                "description": "Get a single brand by ID"
+          }
+        },
+        {
+              "name": "Create Brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"name\": \"Samsung\"\n}"
+            },
+            "url": {
+                  "raw": "{{baseUrl}}/brands",
+              "host": ["{{baseUrl}}"],
+                  "path": ["brands"]
+            },
+                "description": "Create a new brand"
+          }
+        },
+        {
+              "name": "Update Brand",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"name\": \"Samsung Electronics\"\n}"
+            },
+            "url": {
+                  "raw": "{{baseUrl}}/brands/1",
+              "host": ["{{baseUrl}}"],
+                  "path": ["brands", "1"]
+            },
+                "description": "Update an existing brand"
+          }
+        },
+        {
+              "name": "Delete Brand",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/brands/1",
+              "host": ["{{baseUrl}}"],
+                  "path": ["brands", "1"]
+            },
+                "description": "Delete a brand"
+          }
+        }
+      ]
+    },
+    {
+          "name": "Categories Management",
+      "item": [
+        {
+              "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/categories?page=1&limit=10&search=electronics",
+              "host": ["{{baseUrl}}"],
+                  "path": ["categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                      "value": "electronics"
+                }
+              ]
+            },
+                "description": "Get all categories with pagination and search"
+          }
+        },
+        {
+              "name": "Get Single Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/categories/1",
+              "host": ["{{baseUrl}}"],
+                  "path": ["categories", "1"]
+            },
+                "description": "Get a single category by ID"
+          }
+        },
+        {
+              "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"name\": \"Electronics\",\n  \"description\": \"Electronic devices and accessories\"\n}"
+            },
+            "url": {
+                  "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+                  "path": ["categories"]
+            },
+                "description": "Create a new category"
+          }
+        },
+        {
+              "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"name\": \"Electronics & Gadgets\",\n  \"description\": \"Electronic devices, gadgets and accessories\"\n}"
+            },
+            "url": {
+                  "raw": "{{baseUrl}}/categories/1",
+              "host": ["{{baseUrl}}"],
+                  "path": ["categories", "1"]
+            },
+                "description": "Update an existing category"
+          }
+        },
+        {
+              "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/categories/1",
+              "host": ["{{baseUrl}}"],
+                  "path": ["categories", "1"]
+            },
+                "description": "Delete a category"
+          }
+        }
+      ]
+    },
+    {
+          "name": "Products Management",
+      "item": [
+        {
+              "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/products?page=1&limit=10&search=iphone",
+              "host": ["{{baseUrl}}"],
+                  "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                      "value": "iphone"
+                    }
+                  ]
+                },
+                "description": "Get all products with pagination and search"
+              }
+            },
+            {
+              "name": "Get Single Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/products/IPHONE-15",
+              "host": ["{{baseUrl}}"],
+                  "path": ["products", "IPHONE-15"]
+            },
+                "description": "Get a single product by SKU"
+          }
+        },
+        {
+              "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"sku\": \"IPHONE-15\",\n  \"name\": \"iPhone 15 Pro\",\n  \"brandId\": 1,\n  \"categoryId\": 1,\n  \"salePrice\": 999.99,\n  \"stockQuantity\": 50\n}"
+            },
+            "url": {
+                  "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+            },
+                "description": "Create a new product"
+          }
+        },
+        {
+              "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"salePrice\": 1099.99,\n  \"stockQuantity\": 75\n}"
+            },
+            "url": {
+                  "raw": "{{baseUrl}}/products/IPHONE-15",
+              "host": ["{{baseUrl}}"],
+                  "path": ["products", "IPHONE-15"]
+            },
+                "description": "Update an existing product"
+          }
+        },
+        {
+              "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/products/IPHONE-15",
+              "host": ["{{baseUrl}}"],
+                  "path": ["products", "IPHONE-15"]
+                },
+                "description": "Delete a product"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders Management",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                  "raw": "{{baseUrl}}/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                    }
+                  ]
+                },
+                "description": "Get all orders with pagination"
+          }
+        },
+        {
+          "name": "Get Single Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "1"]
+            },
+            "description": "Get a single order by ID"
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"customerId\": 1,\n  \"orderDate\": \"2024-01-15\",\n  \"totalAmount\": 999.99,\n  \"status\": \"completed\",\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"quantity\": 1,\n      \"pricePerUnit\": 999.99,\n      \"totalPrice\": 999.99\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+                "description": "Create a new order"
+          }
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                  "raw": "{\n  \"status\": \"shipped\",\n  \"totalAmount\": 1099.99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "1"]
+            },
+            "description": "Update an existing order"
+          }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "System APIs",
+      "description": "System-level APIs for health checks and data import",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check system health"
+          }
+        },
+        {
+          "name": "Import All Data",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "brands",
+                  "type": "file",
+                  "src": "database/csv-data/brands.csv"
+                },
+                {
+                  "key": "categories",
+                  "type": "file",
+                  "src": "database/csv-data/categories.csv"
+                },
+                {
+                  "key": "customers",
+                  "type": "file",
+                  "src": "database/csv-data/customers.csv"
+                },
+                {
+                  "key": "items",
+                  "type": "file",
+                  "src": "database/csv-data/items.csv"
+                },
+                {
+                  "key": "orders",
+                  "type": "file",
+                  "src": "database/csv-data/orders.csv"
+                },
+                {
+                  "key": "order_items",
+                  "type": "file",
+                  "src": "database/csv-data/order_items.csv"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/import/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["import", "all"]
+            },
+            "description": "Import all sample data from CSV files"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4001/api",
+      "type": "string"
+    }
+  ]
+} 
