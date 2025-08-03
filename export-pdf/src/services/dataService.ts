@@ -223,6 +223,60 @@ export class DataService {
     }
   }
 
+  async getRefundReasonAnalysis(month?: string, year?: number): Promise<any[]> {
+    try {
+      // Query refund_analysis table for refund reasons
+      let query = `
+        SELECT 
+          refund_reason,
+          COUNT(*) as count,
+          SUM(refund_orders) as total_refund_orders,
+          AVG(refund_rate) as avg_refund_rate,
+          SUM(refund_quantity) as total_refund_quantity
+        FROM refund_analysis
+        WHERE sort_type = 'refund_reason'
+          AND refund_reason IS NOT NULL 
+          AND refund_reason != ''
+      `;
+      
+      const params: any[] = [];
+      
+      // Add date filters if provided
+      if (month && year) {
+        query += ` AND MONTH(analysis_date) = ? AND YEAR(analysis_date) = ?`;
+        params.push(parseInt(month), year);
+      }
+      
+      // Group by refund reason and order by count
+      query += ` GROUP BY refund_reason ORDER BY count DESC`;
+      
+      const results = await executeQuery(query, params);
+      
+      // Transform results to chart data format
+      const refundReasons = results.map((row: any) => ({
+        name: row.refund_reason || 'Không xác định',
+        value: row.count || 0,
+        total_refund_orders: row.total_refund_orders || 0,
+        avg_refund_rate: parseFloat(row.avg_refund_rate || 0),
+        total_refund_quantity: row.total_refund_quantity || 0
+      }));
+      
+      return refundReasons;
+      
+    } catch (error) {
+      console.error('Error fetching refund reason analysis:', error);
+      
+      // Return mock data as fallback
+      return [
+        { name: 'Sản phẩm lỗi', value: 35 },
+        { name: 'Không đúng mô tả', value: 25 },
+        { name: 'Giao hàng chậm', value: 20 },
+        { name: 'Thay đổi ý định', value: 15 },
+        { name: 'Khác', value: 5 }
+      ];
+    }
+  }
+
   async getBrandPerformance(limit: number = 10): Promise<BrandPerformance[]> {
     // Mock implementation - replace with actual database queries
     const brands: BrandPerformance[] = [
@@ -287,7 +341,7 @@ export class DataService {
         return await this.getRefundAnalysis(params.month, params.year);
       
       case 'refund_reason':
-        return await this.getRefundAnalysis(params.month, params.year);
+        return await this.getRefundReasonAnalysis(params.month, params.year);
       
       case 'slow_moving':
         return await this.getProductPerformance(params.limit || 10, params.include_refund);

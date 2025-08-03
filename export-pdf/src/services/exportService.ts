@@ -80,7 +80,7 @@ export class ExportService {
     const titles = {
       best_seller: 'Báo cáo sản phẩm bán chạy',
       refund: 'Báo cáo hàng bị refund nhiều',
-      refund_reason: 'Báo cáo lý do refund',
+      refund_reason: 'Báo cáo phân tích lý do refund',
       revenue: 'Báo cáo doanh số chung',
       slow_moving: 'Báo cáo hàng ế',
       all: 'Báo cáo tổng hợp tất cả biểu đồ'
@@ -200,13 +200,10 @@ export class ExportService {
 
       case 'refund_reason':
         // Pie chart for refund reasons
-        const refundReasons = [
-          { name: 'Sản phẩm lỗi', value: 35 },
-          { name: 'Không đúng mô tả', value: 25 },
-          { name: 'Giao hàng chậm', value: 20 },
-          { name: 'Thay đổi ý định', value: 15 },
-          { name: 'Khác', value: 5 }
-        ];
+        const refundReasons = data.slice(0, 10).map((item: any, index: number) => ({
+          name: item.name || item.refund_reason || `Lý do ${index + 1}`,
+          value: item.value || item.count || 0
+        }));
         charts.push({
           type: 'pie',
           title: 'Phân bố lý do refund',
