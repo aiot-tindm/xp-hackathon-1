@@ -18,6 +18,116 @@ import type { SettingsDrawerProps } from '../types';
 
 // ----------------------------------------------------------------------
 
+// Typing Indicator Component
+const TypingIndicator = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'flex-start',
+      mb: 2,
+    }}
+  >
+    <Box
+      sx={{
+        maxWidth: '70%',
+        px: 2,
+        py: 1,
+        borderRadius: 2,
+        background: 'background.paper',
+        color: 'text.primary',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: 'text.secondary',
+            animation: 'typing 1.4s infinite ease-in-out',
+            '&:nth-of-type(1)': {
+              animationDelay: '0s',
+            },
+            '&:nth-of-type(2)': {
+              animationDelay: '0.2s',
+            },
+            '&:nth-of-type(3)': {
+              animationDelay: '0.4s',
+            },
+            '@keyframes typing': {
+              '0%, 60%, 100%': {
+                transform: 'translateY(0)',
+                opacity: 0.4,
+              },
+              '30%': {
+                transform: 'translateY(-10px)',
+                opacity: 1,
+              },
+            },
+          }}
+        />
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: 'text.secondary',
+            animation: 'typing 1.4s infinite ease-in-out',
+            '&:nth-of-type(1)': {
+              animationDelay: '0s',
+            },
+            '&:nth-of-type(2)': {
+              animationDelay: '0.2s',
+            },
+            '&:nth-of-type(3)': {
+              animationDelay: '0.4s',
+            },
+            '@keyframes typing': {
+              '0%, 60%, 100%': {
+                transform: 'translateY(0)',
+                opacity: 0.4,
+              },
+              '30%': {
+                transform: 'translateY(-10px)',
+                opacity: 1,
+              },
+            },
+          }}
+        />
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: 'text.secondary',
+            animation: 'typing 1.4s infinite ease-in-out',
+            '&:nth-of-type(1)': {
+              animationDelay: '0s',
+            },
+            '&:nth-of-type(2)': {
+              animationDelay: '0.2s',
+            },
+            '&:nth-of-type(3)': {
+              animationDelay: '0.4s',
+            },
+            '@keyframes typing': {
+              '0%, 60%, 100%': {
+                transform: 'translateY(0)',
+                opacity: 0.4,
+              },
+              '30%': {
+                transform: 'translateY(-10px)',
+                opacity: 1,
+              },
+            },
+          }}
+        />
+      </Box>
+    </Box>
+  </Box>
+);
+
 type Message = {
   id: string;
   text: string;
@@ -29,6 +139,7 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
   const settings = useSettingsContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const chatAreaRef = useRef<HTMLDivElement>(null);
 
   // Suggested messages
@@ -74,6 +185,9 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
     const currentInput = inputText;
     setInputText('');
 
+    // Show typing indicator
+    setIsTyping(true);
+
     // TODO: Replace this with actual API call
     // Example API endpoints you can call:
     // - OpenAI API: https://api.openai.com/v1/chat/completions
@@ -81,6 +195,9 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
     // - Third-party chatbot API: https://api.chatbot.com/respond
 
     try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -119,6 +236,9 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, botMessage]);
+    } finally {
+      // Hide typing indicator
+      setIsTyping(false);
     }
   };
 
@@ -129,7 +249,7 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
     }
   };
 
-  const handleSuggestedMessageClick = (message: string) => {
+  const handleSuggestedMessageClick = async (message: string) => {
     // Don't fill the input, just send the message directly
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -139,7 +259,10 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
     };
     setMessages([userMessage]);
 
-    // Simulate bot response
+    // Show typing indicator
+    setIsTyping(true);
+
+    // Simulate bot response with delay
     setTimeout(() => {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -148,7 +271,8 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
         timestamp: new Date(),
       };
       setMessages([userMessage, botMessage]);
-    }, 1000);
+      setIsTyping(false);
+    }, 2000);
   };
 
   const renderHead = () => (
@@ -397,6 +521,9 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
               </Box>
             </Box>
           ))}
+          
+          {/* Typing Indicator */}
+          {isTyping && <TypingIndicator />}
         </Box>
       )}
     </Box>
