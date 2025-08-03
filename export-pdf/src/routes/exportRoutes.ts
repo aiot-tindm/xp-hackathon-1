@@ -204,7 +204,7 @@ router.post('/direct', async (req: Request, res: Response) => {
       language
     }, res);
 
-    // If result is void, it means PDF was sent directly
+    // If result is void, it means PDF was sent directly or error was handled
     if (result === undefined) {
       return;
     }

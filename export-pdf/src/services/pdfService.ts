@@ -177,25 +177,39 @@ export class PDFService {
 
   // Add professional footer
   private addFooter(doc: any): void {
-    const pageCount = doc.bufferedPageRange().count;
-    
-    for (let i = 0; i < pageCount; i++) {
-      doc.switchToPage(i);
+    try {
+      const pageRange = doc.bufferedPageRange();
+      const pageCount = pageRange ? pageRange.count : 1;
       
-      const pageHeight = doc.page.height;
+      console.log('🔍 addFooter - pageCount:', pageCount);
       
-      // Add footer background
-      doc.rect(0, pageHeight - 60, 595, 60)
-         .fill('#f8f9fa');
-      
-      // Add footer line
-      doc.moveTo(50, pageHeight - 60)
-         .lineTo(545, pageHeight - 60)
-         .strokeColor('#3498db')
-         .lineWidth(1)
-         .stroke();
-      // // Reset fill color
-      doc.fill('#000000');
+      for (let i = 0; i < pageCount; i++) {
+        try {
+          doc.switchToPage(i);
+          
+          const pageHeight = doc.page.height;
+          
+          // Add footer background
+          doc.rect(0, pageHeight - 60, 595, 60)
+             .fill('#f8f9fa');
+          
+          // Add footer line
+          doc.moveTo(50, pageHeight - 60)
+             .lineTo(545, pageHeight - 60)
+             .strokeColor('#3498db')
+             .lineWidth(1)
+             .stroke();
+          
+          // Reset fill color
+          doc.fill('#000000');
+        } catch {
+          // console.error(`Error adding footer to page ${i}:`, pageError);
+          // Continue with next page
+        }
+      }
+    } catch (error) {
+      console.error('Error in addFooter:', error);
+      // Don't throw error, just log it
     }
   }
 }

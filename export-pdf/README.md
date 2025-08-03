@@ -35,14 +35,16 @@ npm run watch
 
 ## 📊 Các loại Export được hỗ trợ
 
-| Loại | Mô tả | Tham số bắt buộc |
-|------|-------|------------------|
-| `best_seller` | Hàng bán chạy | `type` |
-| `refund` | Hàng bị refund nhiều | `type` |
-| `refund_reason` | Lý do refund | `type` |
-| `revenue` | Doanh số chung | `type` |
-| `slow_moving` | Hàng ế | `type` |
-| `all` | Tất cả biểu đồ (mặc định) | `type` |
+| Loại | Mô tả | Tham số bắt buộc | Số lượng Charts |
+|------|-------|------------------|-----------------|
+| `best_seller` | Hàng bán chạy | `type` | 2 charts |
+| `refund` | Hàng bị refund nhiều | `type` | 2 charts |
+| `refund_reason` | Lý do refund | `type` | 1 chart |
+| `revenue` | Doanh thu theo ngày | `type` | 2 charts |
+| `category` | Phân tích theo danh mục | `type` | 2 charts |
+| `brand` | Phân tích theo thương hiệu | `type` | 2 charts |
+| `slow_moving` | Hàng ế | `type` | 2 charts |
+| `all` | Tất cả biểu đồ tổng hợp | `type` | 11 charts |
 
 ## 🔌 API Endpoints
 
@@ -172,12 +174,49 @@ curl -X POST http://localhost:3000/api/export/direct \
   }'
 ```
 
+### 4. Xuất báo cáo theo danh mục
+```bash
+curl -X POST http://localhost:3000/api/export/direct \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "category",
+    "limit": 10,
+    "format": "pdf",
+    "language": "vi"
+  }'
+```
+
+### 5. Xuất báo cáo theo thương hiệu
+```bash
+curl -X POST http://localhost:3000/api/export/direct \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "brand",
+    "limit": 10,
+    "format": "pdf",
+    "language": "vi"
+  }'
+```
+
+### 6. Xuất báo cáo hàng ế
+```bash
+curl -X POST http://localhost:3000/api/export/direct \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "slow_moving",
+    "limit": 10,
+    "format": "pdf",
+    "language": "vi"
+  }'
+```
+
 ## 🏗️ Cấu trúc dự án
 
 ```
 export-pdf/
 ├── src/
 │   ├── config/
+│   │   ├── database.ts         # Cấu hình kết nối database
 │   │   └── swagger.ts          # Cấu hình Swagger API docs
 │   ├── fonts/
 │   │   ├── Roboto-Bold.ttf     # Font chữ đậm
@@ -185,7 +224,7 @@ export-pdf/
 │   ├── routes/
 │   │   └── exportRoutes.ts     # Định nghĩa API routes
 │   ├── services/
-│   │   ├── dataService.ts      # Xử lý dữ liệu
+│   │   ├── dataService.ts      # Xử lý dữ liệu từ database
 │   │   ├── exportService.ts    # Logic xuất báo cáo
 │   │   └── pdfService.ts       # Tạo file PDF
 │   ├── types/
@@ -195,6 +234,7 @@ export-pdf/
 │   │   └── chartGeneratorLocal.ts # Tạo biểu đồ
 │   └── index.ts                # Entry point
 ├── dist/                       # Build output
+├── inventory-sale-ai.sql       # Database schema
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -204,6 +244,20 @@ export-pdf/
 
 ### Environment Variables
 - `PORT`: Port server (mặc định: 3000)
+- `DB_HOST`: Database host (mặc định: localhost)
+- `DB_PORT`: Database port (mặc định: 3306)
+- `DB_USER`: Database username
+- `DB_PASSWORD`: Database password
+- `DB_NAME`: Database name (mặc định: inventory-sale-ai)
+
+### Database Configuration
+Dịch vụ kết nối trực tiếp với MySQL database để lấy dữ liệu thực tế:
+- Bảng `top_selling_items`: Dữ liệu hàng bán chạy
+- Bảng `daily_sales_summary`: Dữ liệu doanh thu theo ngày
+- Bảng `refund_analysis`: Dữ liệu refund và lý do
+- Bảng `category_summary`: Dữ liệu theo danh mục
+- Bảng `brand_summary`: Dữ liệu theo thương hiệu
+- Bảng `items` + `order_items`: Tính toán hàng ế
 
 ### CORS Configuration
 Dịch vụ được cấu hình để cho phép tất cả origins với credentials.
@@ -218,6 +272,35 @@ Truy cập API documentation tại: `http://localhost:3000/api-docs`
 - Bao gồm tiêu đề, phụ đề, thời gian báo cáo
 - Biểu đồ được render bằng canvas
 - Font Roboto được sử dụng cho tiếng Việt
+- Hỗ trợ 8 loại báo cáo với tổng cộng 11 charts khác nhau
+
+### Chi tiết Charts theo loại
+
+#### `best_seller` (2 charts)
+- Horizontal bar chart: "Top 5 sản phẩm bán chạy (Số lượng)"
+- Horizontal bar chart: "Doanh thu theo sản phẩm (VNĐ)"
+
+#### `revenue` (2 charts)
+- Line chart: "Doanh thu theo ngày (VNĐ)"
+- Bar chart: "Số đơn hàng theo ngày"
+
+#### `refund_reason` (1 chart)
+- Pie chart: "Phân bố lý do refund"
+
+#### `category` (2 charts)
+- Horizontal bar chart: "Doanh thu theo danh mục (VNĐ)"
+- Bar chart: "Số lượng bán theo danh mục"
+
+#### `brand` (2 charts)
+- Horizontal bar chart: "Doanh thu theo thương hiệu (VNĐ)"
+- Bar chart: "Số lượng bán theo thương hiệu"
+
+#### `slow_moving` (2 charts)
+- Horizontal bar chart: "Hàng tồn kho ế (Số lượng)"
+- Bar chart: "Số lượng đã bán của hàng ế"
+
+#### `all` (11 charts)
+- Tổng hợp tất cả charts từ các loại trên
 
 ### JSON Response (khi không xuất PDF)
 ```json
@@ -268,6 +351,7 @@ npm test
 - **express**: Web framework
 - **pdfkit**: Tạo file PDF
 - **chartjs-node-canvas**: Render biểu đồ
+- **mysql2**: MySQL database driver
 - **swagger-jsdoc**: API documentation
 - **cors**: Cross-origin resource sharing
 - **helmet**: Security headers

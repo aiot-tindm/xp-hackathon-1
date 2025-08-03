@@ -620,16 +620,24 @@ export class DataService {
       
       case 'all':
         // Return combined data for all charts
-        const [salesData, productData, refundData] = await Promise.all([
-          this.getSalesData(params.month, params.year, params.platform),
+        const [salesData, productData, refundData, refundReasonData, categoryData, brandData, slowMovingData] = await Promise.all([
+          this.getDailySalesData(params.month, params.year),
           this.getProductPerformance(params.limit || 10, params.include_refund),
-          this.getRefundAnalysis(params.month, params.year)
+          this.getRefundAnalysis(params.month, params.year),
+          this.getRefundReasonAnalysis(params.month, params.year),
+          this.getCategoryPerformance(params.limit || 10),
+          this.getBrandPerformance(params.limit || 10),
+          this.getSlowMovingProducts(params.limit || 10)
         ]);
         
         return {
           sales: salesData,
           products: productData,
-          refunds: refundData
+          refunds: refundData,
+          refund_reasons: refundReasonData,
+          categories: categoryData,
+          brands: brandData,
+          slow_moving: slowMovingData
         };
       
       default:

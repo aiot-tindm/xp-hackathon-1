@@ -42,9 +42,20 @@ export class ExportService {
 
       // Step 4: Generate file based on format
       if (exportParams.format === 'pdf' && res) {
-        // Generate PDF directly to response
-        await this.pdfService.generatePDFFromExportResult(exportResult, res);
-        return; // Don't return JSON response
+        try {
+          // Generate PDF directly to response
+          await this.pdfService.generatePDFFromExportResult(exportResult, res);
+          return; // Don't return JSON response
+        } catch (pdfError) {
+          console.error('❌ PDF generation failed:', pdfError);
+          // Return error response instead of void
+          const processingTime = Date.now() - startTime;
+          return {
+            success: false,
+            error: `PDF generation failed: ${pdfError instanceof Error ? pdfError.message : 'Unknown error'}`,
+            processing_time: processingTime
+          };
+        }
       } else {
         // For other formats or when res is not provided, return JSON
         const processingTime = Date.now() - startTime;
@@ -59,15 +70,7 @@ export class ExportService {
       const processingTime = Date.now() - startTime;
       console.error('❌ Direct export failed:', error);
       
-      if (res) {
-        res.status(500).json({
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          processing_time: processingTime
-        });
-        return;
-      }
-      
+      // Always return error response object, let route handler decide how to send it
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -91,16 +94,19 @@ export class ExportService {
     const title = titles[params.type] || 'Báo cáo xuất dữ liệu';
     const period = this.formatPeriod(params);
     
+    const charts = this.generateCharts(data, params);
+    console.log('🔍 prepareExportResult - charts generated:', charts.length);
+    
     return {
       title,
       subtitle: this.generateSubtitle(params),
       period,
-      data: Array.isArray(data) ? data : [data],
+      data: data,
       summary: this.generateSummary(data, params),
-      charts: this.generateCharts(data, params),
+      charts: charts,
       metadata: {
         generated_at: new Date(),
-        total_records: Array.isArray(data) ? data.length : 1,
+        total_records: params.type === 'all' ? charts.length : (Array.isArray(data) ? data.length : 1),
         export_type: params.type,
         filters: {
           platform: params.platform,
@@ -155,11 +161,31 @@ export class ExportService {
   }
 
   private generateCharts(data: any, params: ExportParams): any[] {
+    const charts = [];
+    
+    console.log('🔍 generateCharts - type:', params.type);
+    console.log('🔍 generateCharts - data type:', typeof data);
+    console.log('🔍 generateCharts - data is array:', Array.isArray(data));
+    console.log('🔍 generateCharts - data keys:', data && typeof data === 'object' ? Object.keys(data) : 'N/A');
+    
+    // For type 'all', data is an object containing multiple arrays
+    if (params.type === 'all') {
+      // Handle combined data object
+      if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+        console.log('🔍 generateCharts - calling generateAllCharts');
+        // Process combined data for 'all' type
+        return this.generateAllCharts(data);
+      } else {
+        console.log('🔍 generateCharts - data is not object for type all, returning empty');
+        return [];
+      }
+    }
+    
+    // For other types, data should be an array
     if (!Array.isArray(data) || data.length === 0) {
+      console.log('🔍 generateCharts - data is not array or empty, returning empty');
       return [];
     }
-
-    const charts = [];
 
     // Generate charts based on export type
     switch (params.type) {
@@ -309,86 +335,146 @@ export class ExportService {
         });
         break;
 
-      case 'all':
       default:
-        // Generate all charts for comprehensive report
-        // Handle combined data from DataService
-        let products: any[] = [];
-        let sales: any[] = [];
-        // let refunds: any[] = [];
-
-        if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
-          // Combined data object
-          const combinedData = data as any;
-          products = combinedData.products || [];
-          sales = combinedData.sales || [];
-          // refunds = combinedData.refunds || [];
-        } else if (Array.isArray(data)) {
-          // Single array data
-          products = data;
-          sales = data;
-          // refunds = data;
-        }
-
-        // 1. Best sellers
-        const allBestSellerData = products.slice(0, 5).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.sold || item.total_sold || item.count || 0
-        }));
-        charts.push({
-          type: 'bar',
-          title: 'Top 5 sản phẩm bán chạy',
-          data: allBestSellerData
-        });
-
-        // 2. Refund rates
-        const allRefundData = products.slice(0, 5).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.refund_rate || item.refund_percentage || 0
-        }));
-        charts.push({
-          type: 'line',
-          title: 'Tỷ lệ refund theo sản phẩm',
-          data: allRefundData
-        });
-
-        // 3. Revenue
-        const allRevenueData = sales.slice(0, 5).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.total_revenue || item.revenue || item.sales || 0
-        }));
-        charts.push({
-          type: 'bar',
-          title: 'Doanh số top 5 sản phẩm',
-          data: allRevenueData
-        });
-
-        // 4. Refund reasons
-        const allRefundReasons = [
-          { name: 'Sản phẩm lỗi', value: 35 },
-          { name: 'Không đúng mô tả', value: 25 },
-          { name: 'Giao hàng chậm', value: 20 },
-          { name: 'Thay đổi ý định', value: 15 },
-          { name: 'Khác', value: 5 }
-        ];
-        charts.push({
-          type: 'pie',
-          title: 'Phân bố lý do refund',
-          data: allRefundReasons
-        });
-
-        // 5. Slow moving inventory
-        const allSlowMovingData = products.slice(0, 5).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.stock || item.inventory || item.remaining || 0
-        }));
-        charts.push({
-          type: 'bar',
-          title: 'Hàng tồn kho chậm luân chuyển',
-          data: allSlowMovingData
-        });
+        // Handle unsupported types
+        console.warn(`Unsupported export type: ${params.type}`);
         break;
     }
+
+    return charts;
+  }
+
+  private generateAllCharts(data: any): any[] {
+    const charts: any[] = [];
+    
+    // Extract data from combined object
+    const products = data.products || [];
+    const sales = data.sales || [];
+    const refundReasonsData = data.refund_reasons || [];
+    const categories = data.categories || [];
+    const brands = data.brands || [];
+    const slowMoving = data.slow_moving || [];
+
+    // 1. Best sellers - Quantity
+    const allBestSellerQuantityData = products.slice(0, 5).map((item: any) => ({
+      name: item.name || item.item_name || 'Unknown Product',
+      value: item.total_sold || item.total_quantity_sold || 0
+    }));
+    charts.push({
+      type: 'horizontal_bar',
+      title: 'Top 5 sản phẩm bán chạy (Số lượng)',
+      data: allBestSellerQuantityData
+    });
+
+    // 2. Best sellers - Revenue
+    const allBestSellerRevenueData = products.slice(0, 5).map((item: any) => ({
+      name: item.name || item.item_name || 'Unknown Product',
+      value: item.total_revenue || 0
+    }));
+    charts.push({
+      type: 'horizontal_bar',
+      title: 'Doanh thu theo sản phẩm (VNĐ)',
+      data: allBestSellerRevenueData
+    });
+
+    // 3. Revenue by day
+    const allRevenueData = sales.slice(0, 10).map((item: any) => ({
+      name: new Date(item.date).toLocaleDateString('vi-VN'),
+      value: item.revenue || 0
+    }));
+    charts.push({
+      type: 'line',
+      title: 'Doanh thu theo ngày (VNĐ)',
+      data: allRevenueData
+    });
+
+    // 4. Orders by day
+    const allOrdersData = sales.slice(0, 10).map((item: any) => ({
+      name: new Date(item.date).toLocaleDateString('vi-VN'),
+      value: item.orders || 0
+    }));
+    charts.push({
+      type: 'bar',
+      title: 'Số đơn hàng theo ngày',
+      data: allOrdersData
+    });
+
+    // 5. Refund reasons
+    const allRefundReasonsData = refundReasonsData.slice(0, 5).map((item: any) => ({
+      name: item.refund_reason || 'Unknown',
+      value: item.count || 0
+    }));
+    charts.push({
+      type: 'pie',
+      title: 'Phân bố lý do refund',
+      data: allRefundReasonsData
+    });
+
+    // 6. Category revenue
+    const allCategoryRevenueData = categories.slice(0, 5).map((item: any) => ({
+      name: item.category_name || 'Unknown',
+      value: item.total_revenue || 0
+    }));
+    charts.push({
+      type: 'horizontal_bar',
+      title: 'Doanh thu theo danh mục (VNĐ)',
+      data: allCategoryRevenueData
+    });
+
+    // 7. Category quantity
+    const allCategoryQuantityData = categories.slice(0, 5).map((item: any) => ({
+      name: item.category_name || 'Unknown',
+      value: item.total_quantity_sold || 0
+    }));
+    charts.push({
+      type: 'bar',
+      title: 'Số lượng bán theo danh mục',
+      data: allCategoryQuantityData
+    });
+
+    // 8. Brand revenue
+    const allBrandRevenueData = brands.slice(0, 5).map((item: any) => ({
+      name: item.brand_name || 'Unknown',
+      value: item.total_revenue || 0
+    }));
+    charts.push({
+      type: 'horizontal_bar',
+      title: 'Doanh thu theo thương hiệu (VNĐ)',
+      data: allBrandRevenueData
+    });
+
+    // 9. Brand quantity
+    const allBrandQuantityData = brands.slice(0, 5).map((item: any) => ({
+      name: item.brand_name || 'Unknown',
+      value: item.total_quantity_sold || 0
+    }));
+    charts.push({
+      type: 'bar',
+      title: 'Số lượng bán theo thương hiệu',
+      data: allBrandQuantityData
+    });
+
+    // 10. Slow moving stock
+    const allSlowMovingStockData = slowMoving.slice(0, 5).map((item: any) => ({
+      name: item.name || 'Unknown Product',
+      value: item.stock_quantity || 0
+    }));
+    charts.push({
+      type: 'horizontal_bar',
+      title: 'Hàng tồn kho ế (Số lượng)',
+      data: allSlowMovingStockData
+    });
+
+    // 11. Slow moving sold
+    const allSlowMovingSoldData = slowMoving.slice(0, 5).map((item: any) => ({
+      name: item.name || 'Unknown Product',
+      value: item.total_sold || 0
+    }));
+    charts.push({
+      type: 'bar',
+      title: 'Số lượng đã bán của hàng ế',
+      data: allSlowMovingSoldData
+    });
 
     return charts;
   }
