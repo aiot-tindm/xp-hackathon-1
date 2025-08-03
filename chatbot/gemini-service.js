@@ -139,20 +139,19 @@ class GeminiService {
             await this.uploadFile(items, 'items');
 
             const orders = await getOrderList();
-            console.log("🚀 ~ GeminiService ~ fetchData ~ orders:", orders)
             await this.uploadFile(orders, 'orders');
 
             const customers = await getCustomerList();
             await this.uploadFile(customers, 'customers');
 
             const sales = await getSalesAnalytics();
-            await this.uploadFile(sales, 'sales');
+            await this.uploadFile(sales.data, 'sales');
 
             const inventory = await getInventoryAnalytics();
-            await this.uploadFile(inventory, 'inventoryAnalytics');
+            await this.uploadFile(inventory.data, 'inventoryAnalytics');
 
             const revenue = await getRevenueAnalytics();
-            await this.uploadFile(revenue, 'revenueAnalytics');
+            await this.uploadFile(revenue.data, 'revenueAnalytics');
 
             console.log('📈 Data summary:', {
                 items: items?.length ?? 0,
