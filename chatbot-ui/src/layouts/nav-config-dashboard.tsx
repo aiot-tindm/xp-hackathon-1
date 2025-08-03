@@ -66,9 +66,7 @@ export const navData: NavSectionProps['data'] = [
         icon: ICONS.product,
         children: [
           { title: 'List', path: paths.dashboard.product.root },
-          { title: 'Details', path: paths.dashboard.product.demo.details },
           { title: 'Create', path: paths.dashboard.product.new },
-          { title: 'Edit', path: paths.dashboard.product.demo.edit },
         ],
       },
       {

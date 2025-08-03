@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { CONFIG } from 'src/global-config';
+import { _products } from 'src/_mock/_product';
 import axios, { endpoints } from 'src/lib/axios';
 
 import { ProductDetailsView } from 'src/sections/product/view';
@@ -25,10 +26,10 @@ export default async function Page({ params }: Props) {
 
 async function getProduct(id: string) {
   const URL = id ? `${endpoints.product.details}?productId=${id}` : '';
+  const products = _products();
+  const product = products.find((_product) => _product.id === id);
 
-  const res = await axios.get(URL);
-
-  return res.data;
+  return {product};
 }
 
 /**
