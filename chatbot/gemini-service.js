@@ -113,55 +113,66 @@ class GeminiService {
     //     }
     // }
     async uploadFile(data, fileName) {
+        if (!data || (Array.isArray(data) && data.length === 0) || (typeof data === 'object' && Object.keys(data).length === 0)) {
+            console.log(`⚠️ Skipping upload for ${fileName} - no data available`);
+            return;
+        }
 
-        const jsonBuffer = Buffer.from(JSON.stringify(data, null, 2), 'utf-8');
-        const fileBlob = new Blob([jsonBuffer], { type: "text/csv" });
-        const file = await this.genAI.files.upload({
-            file: fileBlob,
-            config: { displayName: `${fileName}.csv` },
-        });
-        this.fileContent.push(createPartFromUri(file.uri, file.mimeType))
-        return;
+        try {
+            const jsonBuffer = Buffer.from(JSON.stringify(data, null, 2), 'utf-8');
+            const fileBlob = new Blob([jsonBuffer], { type: "text/csv" });
+            const file = await this.genAI.files.upload({
+                file: fileBlob,
+                config: { displayName: `${fileName}.csv` },
+            });
+            this.fileContent.push(createPartFromUri(file.uri, file.mimeType));
+            console.log(`✅ Uploaded ${fileName} with ${Array.isArray(data) ? data.length : 'object'} items`);
+        } catch (error) {
+            console.error(`❌ Failed to upload ${fileName}:`, error.message);
+        }
     }
     async fetchData() {
-        const items = await getItemList();
-        if (items && items.length > 0) {
+        try {
+            console.log('📊 Fetching data from customer service API...');
+            
+            const items = await getItemList();
             await this.uploadFile(items, 'items');
-        }
 
-        const orders = await getOrderList();
-        if (orders && orders.length > 0) {
+            const orders = await getOrderList();
+            console.log("🚀 ~ GeminiService ~ fetchData ~ orders:", orders)
             await this.uploadFile(orders, 'orders');
-        }
 
-        const customers = await getCustomerList();
-        if (customers && customers.length > 0) {
+            const customers = await getCustomerList();
             await this.uploadFile(customers, 'customers');
-        }
 
-        const sales = await getSalesAnalytics();
-        if (sales && Object.keys(sales).length > 0) {
+            const sales = await getSalesAnalytics();
             await this.uploadFile(sales, 'sales');
-        }
 
-        const inventory = await getInventoryAnalytics();
-        if (inventory && Object.keys(inventory).length > 0) {
+            const inventory = await getInventoryAnalytics();
             await this.uploadFile(inventory, 'inventoryAnalytics');
-        }
 
-        const revenue = await getRevenueAnalytics();
-        if (revenue && Object.keys(revenue).length > 0) {
+            const revenue = await getRevenueAnalytics();
             await this.uploadFile(revenue, 'revenueAnalytics');
-        }
 
-        console.log(
-            items?.length ?? 0,
-            orders?.length ?? 0,
-            customers?.length ?? 0,
-            Object.keys(sales ?? {}).length,
-            Object.keys(inventory ?? {}).length,
-            Object.keys(revenue ?? {}).length
-        );
+            console.log('📈 Data summary:', {
+                items: items?.length ?? 0,
+                orders: orders?.length ?? 0,
+                customers: customers?.length ?? 0,
+                sales: Object.keys(sales ?? {}).length,
+                inventory: Object.keys(inventory ?? {}).length,
+                revenue: Object.keys(revenue ?? {}).length
+            });
+
+            if (this.fileContent.length === 0) {
+                console.warn('⚠️ No data available from customer service API');
+            } else {
+                console.log(`✅ Successfully loaded ${this.fileContent.length} data files`);
+            }
+            return 
+        } catch (error) {
+            console.error('❌ Error fetching data:', error.message);
+            throw new Error('Failed to fetch data from customer service');
+        }
     }
 
 
