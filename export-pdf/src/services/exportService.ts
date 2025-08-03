@@ -145,6 +145,7 @@ export class ExportService {
   }
 
   private generateSummary(data: any, _params: ExportParams): any {
+    console.log('Data:', data.length);
     if (Array.isArray(data)) {
       return {
         total_records: data.length,
@@ -182,7 +183,7 @@ export class ExportService {
       case 'refund':
         // Horizontal bar chart for high refund products
         const refundData = data.slice(0, 10).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
+          name: item.item_name || `Sản phẩm ${index + 1}`,
           value: item.refund_rate || item.refund_percentage || 0
         }));
         charts.push({

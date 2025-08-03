@@ -148,6 +148,12 @@ export interface RefundAnalysis {
   refund_quantity?: number;
   rank_position?: number;
   data_range?: string;
+  // Additional fields from joined tables
+  cost_price?: number;
+  sale_price?: number;
+  stock_quantity?: number;
+  brand_name?: string;
+  category_name?: string;
 }
 
 export interface BrandPerformance {

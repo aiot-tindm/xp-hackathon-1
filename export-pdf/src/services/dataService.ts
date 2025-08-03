@@ -63,35 +63,44 @@ export class DataService {
 
   async getRefundAnalysis(month?: string, year?: number): Promise<RefundAnalysis[]> {
     try {
-      // Query refund_analysis table with filters
+      // Query refund_analysis table with joins to get complete information
       let query = `
         SELECT 
-          sku,
-          item_name,
-          total_orders,
-          refund_orders,
-          refund_rate,
-          refund_reason,
-          refund_quantity,
-          rank_position,
-          data_range,
-          analysis_date
-        FROM refund_analysis 
-        WHERE sort_type = 'refund_count'
+          ra.sku,
+          ra.item_name,
+          ra.total_orders,
+          ra.refund_orders,
+          ra.refund_rate,
+          ra.refund_reason,
+          ra.refund_quantity,
+          ra.rank_position,
+          ra.data_range,
+          ra.analysis_date,
+          i.cost_price,
+          i.sale_price,
+          i.stock_quantity,
+          b.name as brand_name,
+          c.name as category_name
+        FROM refund_analysis ra
+        LEFT JOIN items i ON ra.sku COLLATE utf8mb4_unicode_ci = i.sku COLLATE utf8mb4_unicode_ci
+        LEFT JOIN brands b ON i.brand_id = b.id
+        LEFT JOIN categories c ON i.category_id = c.id
+        WHERE ra.sort_type = 'refund_count'
       `;
-
-      console.log('Query:', query);
       
       const params: any[] = [];
       
       // Add date filters if provided
       if (month && year) {
-        query += ` AND MONTH(analysis_date) = ? AND YEAR(analysis_date) = ?`;
+        query += ` AND MONTH(ra.analysis_date) = ? AND YEAR(ra.analysis_date) = ?`;
         params.push(parseInt(month), year);
       }
       
       // Order by rank position and limit results
-      query += ` ORDER BY rank_position ASC LIMIT 10`;
+      query += ` ORDER BY ra.rank_position ASC LIMIT 10`;
+      
+      // console.log('Query:', query);
+      // console.log('Params:', params);
       
       const results = await executeQuery(query, params);
       
@@ -102,7 +111,7 @@ export class DataService {
         customer_name: 'N/A', // Not available in refund_analysis table
         item_name: row.item_name || 'Không xác định',
         refund_reason: row.refund_reason || 'Không xác định',
-        refund_amount: 0, // Not available in refund_analysis table
+        refund_amount: parseFloat(row.sale_price || 0) * row.refund_quantity, // Calculate refund amount
         order_date: new Date(row.analysis_date),
         platform: 'Tất cả', // Not available in refund_analysis table
         // Additional fields from refund_analysis
@@ -112,9 +121,16 @@ export class DataService {
         refund_rate: parseFloat(row.refund_rate),
         refund_quantity: row.refund_quantity,
         rank_position: row.rank_position,
-        data_range: row.data_range
+        data_range: row.data_range,
+        // Additional fields from joined tables
+        cost_price: parseFloat(row.cost_price || 0),
+        sale_price: parseFloat(row.sale_price || 0),
+        stock_quantity: row.stock_quantity || 0,
+        brand_name: row.brand_name || 'Không xác định',
+        category_name: row.category_name || 'Không xác định'
       }));
       
+      // console.log('Refund data:', refunds);
       return refunds;
     } catch (error) {
       console.error('Error fetching refund analysis:', error);
