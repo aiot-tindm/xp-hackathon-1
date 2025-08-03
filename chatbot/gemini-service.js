@@ -1,11 +1,12 @@
 
 const { createPartFromUri, createUserContent, GoogleGenAI } = require('@google/genai');
+const { getItemList, getOrderList, getCustomerList, getSalesAnalytics, getInventoryAnalytics, getRevenueAnalytics } = require('./api-service');
 require('dotenv').config();
 
 class GeminiService {
     constructor() {
         this.genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
-        this.file = null;
+        this.fileContent = [];
     }
 
     async init() {
@@ -14,8 +15,8 @@ class GeminiService {
 
     async analyzeData(question) {
         try {
-            if (!this.file) {
-                await this.getData();
+            if (!this.fileContent.length) {
+                await this.fetchData();
             }
 
             const prompt = `
@@ -78,7 +79,7 @@ class GeminiService {
             const result = await this.genAI.models.generateContent({
                 model: 'gemini-2.5-flash',
                 contents: createUserContent([
-                    createPartFromUri(this.file.uri ?? '', this.file.mimeType ?? 'text/csv'),
+                    ...this.fileContent,
                     '\n\n',
                     prompt,
 
@@ -214,6 +215,47 @@ class GeminiService {
         });
         return;
     }
+    async fetchData() {
+        const items = await getItemList();
+        if (items && items.length > 0) {
+            await this.uploadFile(items, 'items');
+        }
+
+        const orders = await getOrderList();
+        if (orders && orders.length > 0) {
+            await this.uploadFile(orders, 'orders');
+        }
+
+        const customers = await getCustomerList();
+        if (customers && customers.length > 0) {
+            await this.uploadFile(customers, 'customers');
+        }
+
+        const sales = await getSalesAnalytics();
+        if (sales && Object.keys(sales).length > 0) {
+            await this.uploadFile(sales, 'sales');
+        }
+
+        const inventory = await getInventoryAnalytics();
+        if (inventory && Object.keys(inventory).length > 0) {
+            await this.uploadFile(inventory, 'inventoryAnalytics');
+        }
+
+        const revenue = await getRevenueAnalytics();
+        if (revenue && Object.keys(revenue).length > 0) {
+            await this.uploadFile(revenue, 'revenueAnalytics');
+        }
+
+        console.log(
+            items?.length ?? 0,
+            orders?.length ?? 0,
+            customers?.length ?? 0,
+            Object.keys(sales ?? {}).length,
+            Object.keys(inventory ?? {}).length,
+            Object.keys(revenue ?? {}).length
+        );
+    }
+
 
 }
 
