@@ -375,7 +375,12 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                 }}
               >
-                <Typography variant="body2">{message.text}</Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ whiteSpace: 'pre-line' }}
+                >
+                  {message.text}
+                </Typography>
                 <Typography
                   variant="caption"
                   sx={{
