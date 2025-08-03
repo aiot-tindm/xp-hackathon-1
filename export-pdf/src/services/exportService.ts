@@ -81,7 +81,7 @@ export class ExportService {
       best_seller: 'Báo cáo sản phẩm bán chạy',
       refund: 'Báo cáo hàng bị refund nhiều',
       refund_reason: 'Báo cáo phân tích lý do refund',
-      revenue: 'Báo cáo doanh số chung',
+      revenue: 'Báo cáo doanh thu theo ngày',
       slow_moving: 'Báo cáo hàng ế',
       all: 'Báo cáo tổng hợp tất cả biểu đồ'
     };
@@ -212,36 +212,27 @@ export class ExportService {
         break;
 
       case 'revenue':
-        // Bar chart for revenue
-        const revenueData = data.slice(0, 10).map((item: any, index: number) => ({
-          name: item.name || item.product_name || `Sản phẩm ${index + 1}`,
-          value: item.total_revenue || item.revenue || item.sales || 0
+        // Line chart for daily revenue
+        const dailyRevenueData = data.slice(0, 30).map((item: any) => ({
+          name: new Date(item.date).toLocaleDateString('vi-VN'),
+          value: item.revenue || 0
+        }));
+        charts.push({
+          type: 'line',
+          title: 'Doanh thu theo ngày (VNĐ)',
+          data: dailyRevenueData
+        });
+
+        // Bar chart for daily orders
+        const dailyOrdersData = data.slice(0, 30).map((item: any) => ({
+          name: new Date(item.date).toLocaleDateString('vi-VN'),
+          value: item.orders || 0
         }));
         charts.push({
           type: 'bar',
-          title: 'Doanh số theo sản phẩm',
-          data: revenueData
+          title: 'Số đơn hàng theo ngày',
+          data: dailyOrdersData
         });
-
-        // Pie chart for revenue distribution by category
-        if (data.length > 1) {
-          const categories = data.reduce((acc: any, item: any) => {
-            const category = item.category || item.brand || 'Khác';
-            acc[category] = (acc[category] || 0) + (item.total_revenue || item.revenue || 0);
-            return acc;
-          }, {});
-
-          const pieData = Object.entries(categories).map(([name, value]) => ({
-            name,
-            value: value as number
-          }));
-
-          charts.push({
-            type: 'pie',
-            title: 'Phân bố doanh số theo danh mục',
-            data: pieData
-          });
-        }
         break;
 
       case 'slow_moving':
