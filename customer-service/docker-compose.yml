@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: inventory_sales_db
+    environment:
+      MYSQL_DATABASE: inventory_sales_db
+      MYSQL_USER: seller
+      MYSQL_PASSWORD: seller
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - inventory_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: inventory_sales_backend
+  #   command: npm run dev
+  #   environment:
+  #     NODE_ENV: development
+  #     DATABASE_URL: mysql://seller:seller@mysql/inventory_sales_db
+  #     PORT: 4001
+  #     JWT_SECRET: your-super-secret-jwt-key-here
+  #     JWT_EXPIRES_IN: 7d
+  #     RATE_LIMIT_WINDOW_MS: 900000
+  #     RATE_LIMIT_MAX_REQUESTS: 100
+  #     LOG_LEVEL: debug
+  #     CORS_ORIGIN: "*"
+  #   ports:
+  #     - "4001:4001"
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #     - ./logs:/app/logs
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #   networks:
+  #     - inventory_network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+
+volumes:
+  mysql_data:
+
+networks:
+  inventory_network:
+    driver: bridge 

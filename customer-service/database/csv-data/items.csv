@@ -1,0 +1,41 @@
+sku,name,costPrice,salePrice,stockQuantity,brand,category,isActive
+IPHONE-15-128,iPhone 15 128GB,800.00,999.00,50,Apple,Electronics,true
+IPHONE-15-256,iPhone 15 256GB,850.00,1099.00,30,Apple,Electronics,true
+IPHONE-15-PRO,iPhone 15 Pro 128GB,950.00,1199.00,25,Apple,Electronics,true
+SAMSUNG-S24,Samsung Galaxy S24 128GB,700.00,899.00,40,Samsung,Electronics,true
+SAMSUNG-S24-ULTRA,Samsung Galaxy S24 Ultra 256GB,900.00,1199.00,20,Samsung,Electronics,true
+MACBOOK-AIR,MacBook Air M2 13-inch,1200.00,1499.00,15,Apple,Electronics,true
+MACBOOK-PRO,MacBook Pro M3 14-inch,1800.00,2299.00,10,Apple,Electronics,true
+AIRPODS-PRO,AirPods Pro 2nd Gen,200.00,249.00,100,Apple,Electronics,true
+AIRPODS-MAX,AirPods Max,450.00,549.00,25,Apple,Electronics,true
+SAMSUNG-BUDS,Samsung Galaxy Buds2 Pro,150.00,199.00,80,Samsung,Electronics,true
+NIKE-AIRMAX,Nike Air Max 270,80.00,129.00,200,Nike,Footwear,true
+NIKE-AIRFORCE,Nike Air Force 1,70.00,109.00,150,Nike,Footwear,true
+ADIDAS-ULTRABOOST,Adidas Ultraboost 22,120.00,179.00,100,Adidas,Footwear,true
+ADIDAS-STANSMITH,Adidas Stan Smith,60.00,89.00,120,Adidas,Footwear,true
+NIKE-JORDAN,Nike Air Jordan 1,90.00,139.00,75,Nike,Footwear,true
+SONY-WH1000XM4,Sony WH-1000XM4 Headphones,250.00,349.00,30,Sony,Electronics,true
+SONY-WH1000XM5,Sony WH-1000XM5 Headphones,300.00,399.00,20,Sony,Electronics,true
+IPAD-AIR,iPad Air 5th Gen 64GB,500.00,599.00,35,Apple,Electronics,true
+IPAD-PRO,iPad Pro 12.9-inch 128GB,900.00,1099.00,15,Apple,Electronics,true
+SAMSUNG-TAB,Samsung Galaxy Tab S9 128GB,600.00,749.00,25,Samsung,Electronics,true
+APPLE-WATCH,Apple Watch Series 9 41mm,350.00,399.00,40,Apple,Electronics,true
+SAMSUNG-WATCH,Samsung Galaxy Watch 6 40mm,250.00,299.00,30,Samsung,Electronics,true
+NIKE-DRI-FIT,Nike Dri-FIT Training Shirt,25.00,39.00,300,Nike,Clothing,true
+ADIDAS-TRACK,Adidas Track Jacket,40.00,59.00,200,Adidas,Clothing,true
+NIKE-LEGGINGS,Nike Pro Leggings,35.00,49.00,250,Nike,Clothing,true
+ADIDAS-SHORTS,Adidas Training Shorts,20.00,29.00,400,Adidas,Clothing,true
+NIKE-HOODIE,Nike Sportswear Hoodie,45.00,69.00,180,Nike,Clothing,true
+ADIDAS-SWEATSHIRT,Adidas Sportswear Sweatshirt,35.00,49.00,220,Adidas,Clothing,true
+NIKE-CAP,Nike Heritage Cap,15.00,24.00,500,Nike,Clothing,true
+ADIDAS-BEANIE,Adidas Winter Beanie,12.00,19.00,350,Adidas,Clothing,true
+NIKE-SOCKS,Nike Elite Socks 3-Pack,8.00,12.00,800,Nike,Clothing,true
+ADIDAS-SOCKS,Adidas Performance Socks 6-Pack,10.00,15.00,600,Adidas,Clothing,true
+NIKE-BAG,Nike Duffel Bag,30.00,44.00,150,Nike,Sports,true
+ADIDAS-BAG,Adidas Gym Bag,25.00,34.00,200,Adidas,Sports,true
+NIKE-BALL,Nike Basketball,20.00,29.00,300,Nike,Sports,true
+ADIDAS-BALL,Adidas Soccer Ball,15.00,24.00,400,Adidas,Sports,true
+NIKE-GLOVES,Nike Training Gloves,18.00,27.00,250,Nike,Sports,true
+ADIDAS-GLOVES,Adidas Goalkeeper Gloves,22.00,32.00,180,Adidas,Sports,true
+NIKE-BOTTLE,Nike Water Bottle 32oz,12.00,18.00,400,Nike,Sports,true
+ADIDAS-BOTTLE,Adidas Water Bottle 24oz,10.00,15.00,450,Adidas,Sports,true 
