@@ -1,0 +1,1073 @@
+{
+	"info": {
+		"_postman_id": "analytics-api-collection",
+		"name": "Analytics API Collection",
+		"description": "Collection để test tất cả API endpoints của Analytics System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Home",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						""
+					]
+				},
+				"description": "Trang chủ API với danh sách endpoints"
+			},
+			"response": []
+		},
+		{
+			"name": "Daily Sales",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/daily-sales",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"daily-sales"
+					]
+				},
+				"description": "Lấy dữ liệu doanh số hàng ngày mới nhất"
+			},
+			"response": []
+		},
+		{
+			"name": "Daily Sales by Date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/daily-sales/2024-08-01",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"daily-sales",
+						"2024-08-01"
+					]
+				},
+				"description": "Lấy dữ liệu doanh số theo ngày cụ thể"
+			},
+			"response": []
+		},
+		{
+			"name": "Daily Sales by Period",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/daily-sales/period/all_time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"daily-sales",
+						"period",
+						"all_time"
+					]
+				},
+				"description": "Lấy dữ liệu doanh số theo khoảng thời gian"
+			},
+			"response": []
+		},
+		{
+			"name": "Top Selling Items - Revenue",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=revenue&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"top-selling-items"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "revenue",
+							"description": "Loại sắp xếp"
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"description": "Số lượng kết quả"
+						}
+					]
+				},
+				"description": "Lấy top selling items theo doanh thu"
+			},
+			"response": []
+		},
+		{
+			"name": "Top Selling Items - Profit",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=profit&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"top-selling-items"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "profit",
+							"description": "Loại sắp xếp"
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"description": "Số lượng kết quả"
+						}
+					]
+				},
+				"description": "Lấy top selling items theo lợi nhuận"
+			},
+			"response": []
+		},
+		{
+			"name": "Top Selling Items - Quantity",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=quantity&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"top-selling-items"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "quantity",
+							"description": "Loại sắp xếp"
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"description": "Số lượng kết quả"
+						}
+					]
+				},
+				"description": "Lấy top selling items theo số lượng"
+			},
+			"response": []
+		},
+		{
+			"name": "Category Summary - Revenue",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/category-summary?period=all_time&sort_type=revenue",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"category-summary"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "revenue",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy category summary theo doanh thu"
+			},
+			"response": []
+		},
+		{
+			"name": "Category Summary - Quantity",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/category-summary?period=all_time&sort_type=quantity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"category-summary"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "quantity",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy category summary theo số lượng"
+			},
+			"response": []
+		},
+		{
+			"name": "Brand Summary - Revenue",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/brand-summary?period=all_time&sort_type=revenue",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"brand-summary"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "revenue",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy brand summary theo doanh thu"
+			},
+			"response": []
+		},
+		{
+			"name": "Brand Summary - Quantity",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/brand-summary?period=all_time&sort_type=quantity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"brand-summary"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "quantity",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy brand summary theo số lượng"
+			},
+			"response": []
+		},
+		{
+			"name": "Refund Analysis - Count",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_count",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"refund-analysis"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "refund_count",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy refund analysis theo số lượng hoàn tiền"
+			},
+			"response": []
+		},
+		{
+			"name": "Refund Analysis - Rate",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_rate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"refund-analysis"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "refund_rate",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy refund analysis theo tỉ lệ hoàn tiền"
+			},
+			"response": []
+		},
+		{
+			"name": "Refund Analysis - Quantity",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_quantity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"refund-analysis"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "refund_quantity",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy refund analysis theo số lượng sản phẩm hoàn tiền"
+			},
+			"response": []
+		},
+		{
+			"name": "Refund Analysis - Reason",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_reason",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"refund-analysis"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						},
+						{
+							"key": "sort_type",
+							"value": "refund_reason",
+							"description": "Loại sắp xếp"
+						}
+					]
+				},
+				"description": "Lấy refund analysis theo lý do hoàn tiền"
+			},
+			"response": []
+		},
+		{
+			"name": "Low Stock Alerts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/low-stock-alerts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"low-stock-alerts"
+					]
+				},
+				"description": "Lấy cảnh báo tồn kho thấp"
+			},
+			"response": []
+		},
+		{
+			"name": "Batch Analysis",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/batch-analysis?period=all_time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"batch-analysis"
+					],
+					"query": [
+						{
+							"key": "period",
+							"value": "all_time",
+							"description": "Khoảng thời gian"
+						}
+					]
+				},
+				"description": "Lấy dữ liệu batch analysis"
+			},
+			"response": []
+		},
+		{
+			"name": "Summary Overview",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/summary/overview",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"summary",
+						"overview"
+					]
+				},
+				"description": "Lấy tổng quan dữ liệu summary"
+			},
+			"response": []
+		},
+		{
+			"name": "Available Periods",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/summary/periods",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"summary",
+						"periods"
+					]
+				},
+				"description": "Lấy danh sách các khoảng thời gian có sẵn"
+			},
+			"response": []
+		},
+		{
+			"name": "Available Dates",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/summary/dates",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"summary",
+						"dates"
+					]
+				},
+				"description": "Lấy danh sách các ngày phân tích có sẵn"
+			},
+			"response": []
+		},
+		{
+			"name": "Test Different Periods",
+			"item": [
+				{
+					"name": "1 Day Ago",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=1_day_ago&sort_type=revenue&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "1_day_ago",
+									"description": "1 ngày trước"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Theo doanh thu"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Giới hạn 5 kết quả"
+								}
+							]
+						},
+						"description": "Test với period 1 ngày trước"
+					},
+					"response": []
+				},
+				{
+					"name": "7 Days Ago",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=7_days_ago&sort_type=revenue&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "7_days_ago",
+									"description": "7 ngày trước"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Theo doanh thu"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Giới hạn 5 kết quả"
+								}
+							]
+						},
+						"description": "Test với period 7 ngày trước"
+					},
+					"response": []
+				},
+				{
+					"name": "1 Month Ago",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=1_month_ago&sort_type=revenue&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "1_month_ago",
+									"description": "1 tháng trước"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Theo doanh thu"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Giới hạn 5 kết quả"
+								}
+							]
+						},
+						"description": "Test với period 1 tháng trước"
+					},
+					"response": []
+				},
+				{
+					"name": "3 Months Ago",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=3_months_ago&sort_type=revenue&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "3_months_ago",
+									"description": "3 tháng trước"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Theo doanh thu"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Giới hạn 5 kết quả"
+								}
+							]
+						},
+						"description": "Test với period 3 tháng trước"
+					},
+					"response": []
+				},
+				{
+					"name": "6 Months Ago",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=6_months_ago&sort_type=revenue&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "6_months_ago",
+									"description": "6 tháng trước"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Theo doanh thu"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Giới hạn 5 kết quả"
+								}
+							]
+						},
+						"description": "Test với period 6 tháng trước"
+					},
+					"response": []
+				},
+				{
+					"name": "1 Year Ago",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=1_year_ago&sort_type=revenue&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "1_year_ago",
+									"description": "1 năm trước"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Theo doanh thu"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Giới hạn 5 kết quả"
+								}
+							]
+						},
+						"description": "Test với period 1 năm trước"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các khoảng thời gian khác nhau"
+		},
+		{
+			"name": "Test with Date Parameter",
+			"item": [
+				{
+					"name": "Top Selling Items with Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=revenue&limit=5&date=2024-08-01",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "all_time",
+									"description": "Khoảng thời gian"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Loại sắp xếp"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Số lượng kết quả"
+								},
+								{
+									"key": "date",
+									"value": "2024-08-01",
+									"description": "Ngày phân tích"
+								}
+							]
+						},
+						"description": "Test với date parameter"
+					},
+					"response": []
+				},
+				{
+					"name": "Brand Summary with Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/brand-summary?period=all_time&sort_type=revenue&date=2024-08-01",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"brand-summary"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "all_time",
+									"description": "Khoảng thời gian"
+								},
+								{
+									"key": "sort_type",
+									"value": "revenue",
+									"description": "Loại sắp xếp"
+								},
+								{
+									"key": "date",
+									"value": "2024-08-01",
+									"description": "Ngày phân tích"
+								}
+							]
+						},
+						"description": "Test brand summary với date parameter"
+					},
+					"response": []
+				},
+				{
+					"name": "Low Stock Alerts with Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/low-stock-alerts?date=2024-08-01",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"low-stock-alerts"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-08-01",
+									"description": "Ngày phân tích"
+								}
+							]
+						},
+						"description": "Test low stock alerts với date parameter"
+					},
+					"response": []
+				}
+			],
+			"description": "Test với date parameter"
+		},
+		{
+			"name": "Error Cases",
+			"item": [
+				{
+					"name": "Invalid Date Format",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/daily-sales/2024-13-01",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"daily-sales",
+								"2024-13-01"
+							]
+						},
+						"description": "Test với ngày không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Sort Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=invalid&limit=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"top-selling-items"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "all_time",
+									"description": "Khoảng thời gian"
+								},
+								{
+									"key": "sort_type",
+									"value": "invalid",
+									"description": "Loại sắp xếp không hợp lệ"
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Test với sort_type không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Non-existent Endpoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/non-existent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"non-existent"
+							]
+						},
+						"description": "Test endpoint không tồn tại"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các trường hợp lỗi"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Pre-request script để log request",
+					"console.log('Making request to: ' + pm.request.url);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Test script để kiểm tra response",
+					"pm.test('Status code is 200', function () {",
+					"    pm.response.to.have.status(200);",
+					"});",
+					"",
+					"pm.test('Response has success field', function () {",
+					"    const jsonData = pm.response.json();",
+					"    pm.expect(jsonData).to.have.property('success');",
+					"});",
+					"",
+					"pm.test('Response time is less than 2000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"});",
+					"",
+					"// Log response data",
+					"console.log('Response:', pm.response.json());"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "test_date",
+			"value": "2024-08-01",
+			"type": "string"
+		}
+	]
+} 
