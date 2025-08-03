@@ -1,0 +1,85 @@
+import type { NavSectionProps } from 'src/components/nav-section';
+
+import { paths } from 'src/routes/paths';
+
+import { CONFIG } from 'src/global-config';
+
+import { SvgColor } from 'src/components/svg-color';
+
+// ----------------------------------------------------------------------
+
+const icon = (name: string) => (
+  <SvgColor src={`${CONFIG.assetsDir}/assets/icons/navbar/${name}.svg`} />
+);
+
+const ICONS = {
+  job: icon('ic-job'),
+  blog: icon('ic-blog'),
+  chat: icon('ic-chat'),
+  mail: icon('ic-mail'),
+  user: icon('ic-user'),
+  file: icon('ic-file'),
+  lock: icon('ic-lock'),
+  tour: icon('ic-tour'),
+  order: icon('ic-order'),
+  label: icon('ic-label'),
+  blank: icon('ic-blank'),
+  kanban: icon('ic-kanban'),
+  folder: icon('ic-folder'),
+  course: icon('ic-course'),
+  banking: icon('ic-banking'),
+  booking: icon('ic-booking'),
+  invoice: icon('ic-invoice'),
+  product: icon('ic-product'),
+  calendar: icon('ic-calendar'),
+  disabled: icon('ic-disabled'),
+  external: icon('ic-external'),
+  menuItem: icon('ic-menu-item'),
+  ecommerce: icon('ic-ecommerce'),
+  analytics: icon('ic-analytics'),
+  dashboard: icon('ic-dashboard'),
+  parameter: icon('ic-parameter'),
+};
+
+// ----------------------------------------------------------------------
+
+export const navData: NavSectionProps['data'] = [
+  /**
+   * Overview
+   */
+  {
+    subheader: 'Overview',
+    items: [
+      { title: 'Ecommerce', path: paths.dashboard.general.ecommerce, icon: ICONS.ecommerce },
+      { title: 'Analytics', path: paths.dashboard.general.analytics, icon: ICONS.analytics },
+    ],
+  },
+  /**
+   * Management
+   */
+  {
+    subheader: 'Management',
+    items: [
+      {
+        title: 'Product',
+        path: paths.dashboard.product.root,
+        icon: ICONS.product,
+        children: [
+          { title: 'List', path: paths.dashboard.product.root },
+          { title: 'Details', path: paths.dashboard.product.demo.details },
+          { title: 'Create', path: paths.dashboard.product.new },
+          { title: 'Edit', path: paths.dashboard.product.demo.edit },
+        ],
+      },
+      {
+        title: 'Order',
+        path: paths.dashboard.order.root,
+        icon: ICONS.order,
+        children: [
+          { title: 'List', path: paths.dashboard.order.root },
+          { title: 'Details', path: paths.dashboard.order.demo.details },
+        ],
+      },
+    ],
+  },
+];
