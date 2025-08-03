@@ -86,13 +86,13 @@ export class PDFService {
       await this.addChartsFromExportResult(doc, exportResult.charts);
     }
 
-    // Add summary if available
-    if (exportResult.summary) {
-      this.addSummaryFromExportResult(doc, exportResult.summary);
-    }
+    // Add summary if available - REMOVED
+    // if (exportResult.summary) {
+    //   this.addSummaryFromExportResult(doc, exportResult.summary);
+    // }
 
     // Add metadata
-    this.addMetadataFromExportResult(doc, exportResult.metadata);
+    // this.addMetadataFromExportResult(doc, exportResult.metadata);
 
     doc.end();
   }
@@ -149,55 +149,6 @@ export class PDFService {
            .text(`Không thể tạo biểu đồ: ${chart.title}`, 50, y)
            .moveDown(1);
         y += 50;
-      }
-    }
-  }
-
-  // Add summary from ExportService result
-  private addSummaryFromExportResult(doc: any, summary: any): void {
-    doc.fontSize(16)
-       .font(this.FONT_BOLD)
-       .text('Tóm tắt', 50, doc.y + 20)
-       .moveDown(0.5);
-
-    doc.fontSize(12)
-       .font(this.FONT_NORMAL);
-
-    if (summary.total_records !== undefined) {
-      doc.text(`Tổng số bản ghi: ${summary.total_records}`, 50, doc.y + 10);
-    }
-    if (summary.total_revenue !== undefined) {
-      doc.text(`Tổng doanh thu: ${summary.total_revenue.toLocaleString('vi-VN')} VNĐ`, 50, doc.y + 10);
-    }
-    if (summary.total_orders !== undefined) {
-      doc.text(`Tổng đơn hàng: ${summary.total_orders}`, 50, doc.y + 10);
-    }
-    if (summary.average_refund_rate !== undefined) {
-      doc.text(`Tỷ lệ hoàn hàng trung bình: ${summary.average_refund_rate.toFixed(2)}%`, 50, doc.y + 10);
-    }
-
-    doc.moveDown(1);
-  }
-
-  // Add metadata from ExportService result
-  private addMetadataFromExportResult(doc: any, metadata: any): void {
-    doc.fontSize(10)
-       .font(this.FONT_NORMAL)
-       .text(`Được tạo lúc: ${metadata.generated_at.toLocaleString('vi-VN')}`, 50, doc.y + 20)
-       .text(`Loại báo cáo: ${metadata.export_type}`, 50, doc.y + 10);
-
-    if (metadata.filters) {
-      const filters = metadata.filters;
-      const filterTexts = [];
-      
-      if (filters.platform) filterTexts.push(`Nền tảng: ${filters.platform}`);
-      if (filters.month) filterTexts.push(`Tháng: ${filters.month}`);
-      if (filters.year) filterTexts.push(`Năm: ${filters.year}`);
-      if (filters.quarter) filterTexts.push(`Quý: ${filters.quarter}`);
-      if (filters.include_refund) filterTexts.push('Bao gồm hoàn hàng');
-
-      if (filterTexts.length > 0) {
-        doc.text(`Bộ lọc: ${filterTexts.join(', ')}`, 50, doc.y + 10);
       }
     }
   }
@@ -279,8 +230,8 @@ export class PDFService {
     // Add charts based on type
     await this.addChartsForType(doc, exportResult);
 
-    // Add summary
-    this.addSummaryForExport(doc, exportResult.summary);
+    // Add summary - REMOVED
+    // this.addSummaryForExport(doc, exportResult.summary);
 
     // Add insights
     this.addInsightForExport(doc, exportResult);
@@ -428,16 +379,6 @@ export class PDFService {
     
     doc.image(refundChart, 50, y + 200, { width: 250 });
     doc.moveDown(2);
-  }
-
-  // Add summary for export
-  private addSummaryForExport(doc: any, summary: ExportResult['summary']): void {
-    doc.font(this.FONT_BOLD).fontSize(14).text('Tóm tắt báo cáo', 50, doc.y + 20);
-    doc.font(this.FONT_NORMAL).fontSize(12);
-    doc.text(`Tổng số sản phẩm: ${summary.totalItems}`, 50, doc.y + 10);
-    doc.text(`Tổng số lượng bán: ${summary.totalSold}`, 50, doc.y + 25);
-    doc.text(`Tổng tồn kho: ${summary.totalStock}`, 50, doc.y + 40);
-    doc.text(`Tỷ lệ hoàn trả trung bình: ${summary.averageRefundRate}%`, 50, doc.y + 55);
   }
 
   // Add insights for export
