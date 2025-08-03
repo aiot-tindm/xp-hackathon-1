@@ -1,0 +1,34 @@
+
+services:
+  analysis-api:
+    build:
+      context: ./analysis-inventory/api-server
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=api.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5000
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+    volumes:
+      - ./analysis-inventory/api-server:/app
+
+  customer-api:
+    build:
+      context: ./customer-service/api-server
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./customer-service/api-server:/app
+
+  chatbot-ui:
+    build:
+      context: ./chatbot-ui
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./chatbot-ui:/app
