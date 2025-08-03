@@ -47,15 +47,15 @@ export class PDFService {
     //   this.addSummaryFromExportResult(doc, exportResult.summary);
     // }
 
-    // Add metadata
-    // this.addMetadataFromExportResult(doc, exportResult.metadata);
+    // Add professional footer
+    this.addFooter(doc);
 
     doc.end();
   }
 
   // Add charts from ExportService result
   private async addChartsFromExportResult(doc: any, charts: any[]): Promise<void> {
-    let y = doc.y + 20;
+    let y = doc.y + 30;
 
     for (const chart of charts) {
       if (y > 700) { // Check if we need a new page
@@ -63,13 +63,21 @@ export class PDFService {
         y = 50;
       }
 
-      // Add chart title
-      doc.fontSize(14)
+      // Add section background
+      doc.rect(30, y - 10, 535, 50)
+         .fill('#f8f9fa')
+         .strokeColor('#e9ecef')
+         .lineWidth(1)
+         .stroke();
+
+      // Add chart title with professional styling
+      doc.fontSize(16)
          .font(this.FONT_BOLD)
+         .fill('#2c3e50')
          .text(chart.title, 50, y)
          .moveDown(0.5);
 
-      y += 30;
+      y += 40;
 
       // Generate chart image based on type
       try {
@@ -85,6 +93,9 @@ export class PDFService {
           case 'bar':
             chartBuffer = await ChartGenerator.getBarChartBuffer(labels, values, chart.title);
             break;
+          case 'horizontal_bar':
+            chartBuffer = await ChartGenerator.getHorizontalBarChartBuffer(labels, values, chart.title);
+            break;
           case 'line':
             chartBuffer = await ChartGenerator.getLineChartBuffer(labels, values, chart.title);
             break;
@@ -98,22 +109,34 @@ export class PDFService {
             chartBuffer = await ChartGenerator.getBarChartBuffer(labels, values, chart.title);
         }
 
-        // Center the chart and make it larger
-        const chartWidth = 400;
+        // Center the chart and make it larger with professional styling
+        const chartWidth = 450;
         const pageWidth = 595; // A4 width in points
         const chartX = (pageWidth - chartWidth) / 2;
         
+        // Add chart container with shadow effect
+        doc.rect(chartX - 10, y - 10, chartWidth + 20, 280)
+           .fill('#ffffff')
+           .strokeColor('#e9ecef')
+           .lineWidth(1)
+           .stroke();
+        
         doc.image(chartBuffer, chartX, y, { width: chartWidth });
-        y += 250;
-        doc.moveDown(3);
+        y += 300;
+        doc.moveDown(2);
+        
+        // Reset fill color
+        doc.fill('#000000');
       } catch (error) {
         console.error('Error generating chart:', error);
-        // Add fallback text
+        // Add fallback text with professional styling
         doc.fontSize(12)
            .font(this.FONT_NORMAL)
-           .text(`Không thể tạo biểu đồ: ${chart.title}`, 50, y)
+           .fill('#e74c3c')
+           .text(`⚠️ Không thể tạo biểu đồ: ${chart.title}`, 50, y)
            .moveDown(1);
         y += 50;
+        doc.fill('#000000');
       }
     }
   }
@@ -122,10 +145,57 @@ export class PDFService {
 
 
 
-  // Add title to PDF
+  // Add title to PDF with professional styling
   private addTitle(doc: any, title: string, period: string): void {
-    doc.font(this.FONT_BOLD).fontSize(20).text(title, 50, 50);
-    doc.font(this.FONT_NORMAL).fontSize(14).text(`Kỳ báo cáo: ${period}`, 50, 80);
-    doc.font(this.FONT_NORMAL).fontSize(12).text(`Ngày tạo: ${new Date().toLocaleDateString('vi-VN')}`, 50, 100);
+    // Add a subtle background rectangle for the header
+    doc.rect(0, 0, 595, 120)
+       .fill('#f8f9fa');
+    
+    // Main title with larger font and better spacing
+    doc.font(this.FONT_BOLD)
+       .fontSize(24)
+       .fill('#2c3e50')
+       .text(title, 50, 40);
+    
+    // Add a decorative line under the title
+    doc.moveTo(50, 75)
+       .lineTo(545, 75)
+       .strokeColor('#3498db')
+       .lineWidth(2)
+       .stroke();
+    
+    // Metadata with better styling
+    doc.font(this.FONT_NORMAL)
+       .fontSize(12)
+       .fill('#7f8c8d')
+       .text(`Kỳ báo cáo: ${period}`, 50, 90)
+       .text(`Ngày tạo: ${new Date().toLocaleDateString('vi-VN')}`, 50, 105);
+    
+    // Reset fill color
+    doc.fill('#000000');
+  }
+
+  // Add professional footer
+  private addFooter(doc: any): void {
+    const pageCount = doc.bufferedPageRange().count;
+    
+    for (let i = 0; i < pageCount; i++) {
+      doc.switchToPage(i);
+      
+      const pageHeight = doc.page.height;
+      
+      // Add footer background
+      doc.rect(0, pageHeight - 60, 595, 60)
+         .fill('#f8f9fa');
+      
+      // Add footer line
+      doc.moveTo(50, pageHeight - 60)
+         .lineTo(545, pageHeight - 60)
+         .strokeColor('#3498db')
+         .lineWidth(1)
+         .stroke();
+      // // Reset fill color
+      doc.fill('#000000');
+    }
   }
 }

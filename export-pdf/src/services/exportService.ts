@@ -181,8 +181,8 @@ export class ExportService {
           value: item.refund_rate || item.refund_percentage || 0
         }));
         charts.push({
-          type: 'bar',
-          title: 'Sản phẩm có tỷ lệ refund cao',
+          type: 'horizontal_bar',
+          title: 'Tỷ lệ refund theo sản phẩm (%)',
           data: refundData
         });
         break;
