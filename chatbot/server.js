@@ -14,14 +14,13 @@ app.use(express.static('public'));
 
 app.post('/api/chat', async (req, res) => {
     try {
-        const { message} = req.body;
+        const { message } = req.body;
 
         if (!message) {
             return res.status(400).json({ error: 'Message is required' });
         }
 
         let response;
-        
         response = await geminiService.analyzeData(message);
 
         res.json({ response });
@@ -32,19 +31,33 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // app.post('/api/insights', async (req, res) => {
-//     try {
-//         const { data } = req.body;
 
-//         if (!data) {
-//             return res.status(400).json({ error: 'Data is required' });
-//         }
+//     try {
 
-//         const insights = await geminiService.generateInsights(data);
-//         res.json({ insights });
-//     } catch (error) {
-//         console.error('Insights error:', error);
-//         res.status(500).json({ error: 'Không thể tạo insights' });
-//     }
+//         const { data } = req.body;
+
+
+
+//         if (!data) {
+
+//             return res.status(400).json({ error: 'Data is required' });
+
+//         }
+
+
+
+//         const insights = await geminiService.generateInsights(data);
+
+//         res.json({ insights });
+
+//     } catch (error) {
+
+//         console.error('Insights error:', error);
+
+//         res.status(500).json({ error: 'Không thể tạo insights' });
+
+//     }
+
 // });
 
 

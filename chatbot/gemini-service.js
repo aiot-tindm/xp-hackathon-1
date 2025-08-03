@@ -1,4 +1,3 @@
-
 const { createPartFromUri, createUserContent, GoogleGenAI } = require('@google/genai');
 const { getItemList, getOrderList, getCustomerList, getSalesAnalytics, getInventoryAnalytics, getRevenueAnalytics } = require('./api-service');
 require('dotenv').config();
@@ -10,7 +9,7 @@ class GeminiService {
     }
 
     async init() {
-        await this.getData();
+        await this.fetchData();
     }
 
     async analyzeData(question) {
@@ -21,18 +20,18 @@ class GeminiService {
 
             const prompt = `
                     You are a data analyst. You are given an array of JSON objects. Each object represents one sales transaction and includes the following fields:
-
+ 
                     Use this data to answer the question below.
-
+ 
                     Question:
                     ${question}
-
+ 
                     🔍 Output format requirements:
                         1. Insight (human-style conclusion):
                             - Provide a short, natural language summary or insight.
                             - Do NOT use key-value pairs here.
                             - Keep it professional and business-oriented.
-
+ 
                         2. Reference (optional):
                             - Only include this section if the question relates to: sales performance, revenue, top-selling products, or top-performing brands...
                             - Do NOT include this section for planning, strategy, or recommendation-style questions.
@@ -44,8 +43,8 @@ class GeminiService {
                             - Do not use bullet points, tables, or JSON
                             - All values should be in plain text or numbers
                             - If the insight involves product/item → you must include:
-                                - itemName: [required]
-                                - sku: [required]
+                                - Item Name: [required]
+                                - Sku: [required]
                             - If the insight involves revenue, value, or money-related metrics → you must include:
                                 - Formula: [e.g., revenue = quantity * price]
                                 - Source Columns: [comma-separated original fields used in calculation]
@@ -57,7 +56,7 @@ class GeminiService {
                                             Price: 50
                                             Revenue: 500
                                     - For aggregated values across multiple items/orders, do NOT show all Source Column values (just formula + Source Columns is enough).
-
+ 
                                 - If relevant fields are present in the data, also include:
                                     - CVR: [Conversion rate, e.g., conversions / impressions]
                                     - ROI: [Return on investment, e.g., (revenue - cost) / cost]
@@ -72,7 +71,7 @@ class GeminiService {
                         - Use clear and concise bullet points or table format.
                         - Avoid flowery or poetic language. Keep the tone professional and data-focused.
                         - For forecasts, base the analysis only on trends visible in the provided data. Do not guess.
-
+ 
                     `;
 
 
@@ -97,7 +96,7 @@ class GeminiService {
     //         const prompt = `
     //         Phân tích dữ liệu sau và đưa ra những insights quan trọng:
     //         ${JSON.stringify(data, null, 2)}
-            
+
     //         Hãy tìm ra:
     //         1. Xu hướng chính
     //         2. Điểm bất thường
@@ -113,106 +112,15 @@ class GeminiService {
     //         throw new Error('Không thể tạo insights');
     //     }
     // }
-    async getData() {
-        // thay bằng data khi call api
-        const data =  [
-            {
-                OrderID: 1001,
-                Customer: 'Alice',
-                Product: 'Laptop',
-                Category: 'Electronics',
-                Price: 1200,
-                Quantity: 1,
-                OrderDate: '2024-05-01',
-            },
-            {
-                OrderID: 1002,
-                Customer: 'Bob',
-                Product: 'Headphones',
-                Category: 'Electronics',
-                Price: 150,
-                Quantity: 2,
-                OrderDate: '2024-05-02',
-            },
-            {
-                OrderID: 1003,
-                Customer: 'Charlie',
-                Product: 'Book',
-                Category: 'Books',
-                Price: 20,
-                Quantity: 3,
-                OrderDate: '2024-05-02',
-            },
-            {
-                OrderID: 1004,
-                Customer: 'Diana',
-                Product: 'Desk',
-                Category: 'Furniture',
-                Price: 300,
-                Quantity: 1,
-                OrderDate: '2024-05-03',
-            },
-            {
-                OrderID: 1005,
-                Customer: 'Evan',
-                Product: 'Monitor',
-                Category: 'Electronics',
-                Price: 250,
-                Quantity: 2,
-                OrderDate: '2024-05-03',
-            },
-            {
-                OrderID: 1006,
-                Customer: 'Fiona',
-                Product: 'Chair',
-                Category: 'Furniture',
-                Price: 120,
-                Quantity: 4,
-                OrderDate: '2024-05-04',
-            },
-            {
-                OrderID: 1007,
-                Customer: 'George',
-                Product: 'Notebook',
-                Category: 'Books',
-                Price: 5,
-                Quantity: 10,
-                OrderDate: '2024-05-04',
-            },
-            {
-                OrderID: 1008,
-                Customer: 'Hannah',
-                Product: 'Phone',
-                Category: 'Electronics',
-                Price: 900,
-                Quantity: 1,
-                OrderDate: '2024-05-05',
-            },
-            {
-                OrderID: 1009,
-                Customer: 'Ian',
-                Product: 'Lamp',
-                Category: 'Furniture',
-                Price: 80,
-                Quantity: 2,
-                OrderDate: '2024-05-05',
-            },
-            {
-                OrderID: 1010,
-                Customer: 'Jane',
-                Product: 'Keyboard',
-                Category: 'Electronics',
-                Price: 100,
-                Quantity: 1,
-                OrderDate: '2024-05-06',
-            },
-        ];
+    async uploadFile(data, fileName) {
+
         const jsonBuffer = Buffer.from(JSON.stringify(data, null, 2), 'utf-8');
         const fileBlob = new Blob([jsonBuffer], { type: "text/csv" });
-        this.file = await this.genAI.files.upload({
+        const file = await this.genAI.files.upload({
             file: fileBlob,
-            config: { displayName: 'data.csv' },
+            config: { displayName: `${fileName}.csv` },
         });
+        this.fileContent.push(createPartFromUri(file.uri, file.mimeType))
         return;
     }
     async fetchData() {
