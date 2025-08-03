@@ -43,9 +43,25 @@ class GeminiService {
                                 - itemName: [required]
                                 - sku: [required]
                             - If the insight involves revenue, value, or money-related metrics → you must include:
-                                - formula: [e.g., revenue = quantity * price]
-                                - sourceColumns: [comma-separated original fields used in calculation]
-                                                                
+                                - Formula: [e.g., revenue = quantity * price]
+                                - Source Columns: [comma-separated original fields used in calculation]
+                                - Show actual Source Column values only when the metric is calculated for a **specific item** or **specific order** (not aggregated total).
+                                    - Format for value display:
+                                        - Column Name: value
+                                        - Example:
+                                            Quantity: 10
+                                            Price: 50
+                                            Revenue: 500
+                                    - For aggregated values across multiple items/orders, do NOT show all Source Column values (just formula + Source Columns is enough).
+
+                                - If relevant fields are present in the data, also include:
+                                    - CVR: [Conversion rate, e.g., conversions / impressions]
+                                    - ROI: [Return on investment, e.g., (revenue - cost) / cost]
+                                    - AOV: [Average order value, e.g., revenue / number of orders]
+                                    - Cost: [If available]
+                                    - CPC: [Cost per click, if clicks and cost available]
+                                    - CPM: [Cost per 1000 impressions, if impressions and cost available]
+                            - If the insight does NOT involve revenue or any financial metric, do NOT include financial details like AOV, ROI, CVR, cost, etc.
                     🔍 Important instructions:
                         - Use only the data provided in the file. Do not assume or hallucinate extra information.
                         - If any data point is missing or cannot be computed, say "Not available" or "Insufficient data".
