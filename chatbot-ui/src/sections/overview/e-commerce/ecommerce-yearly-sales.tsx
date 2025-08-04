@@ -15,6 +15,7 @@ import { fShortenNumber } from 'src/utils/format-number';
 
 import { Iconify } from 'src/components/iconify';
 import { Chart, useChart, ChartSelect, ChartLegends } from 'src/components/chart';
+import { exportToPDF } from 'src/actions/export-pdf';
 
 // ----------------------------------------------------------------------
 
@@ -56,38 +57,12 @@ export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: 
 
   const handleExportData = useCallback(async () => {
     try {
-      // Call API to export PDF
-      const response = await fetch('/api/export/yearly-sales', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          year: selectedSeries,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-
-      // Get PDF blob from response
-      const pdfBlob = await response.blob();
-      
-      // Create download link
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `yearly-sales-${selectedSeries}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      await exportToPDF('all');
     } catch (error) {
       console.error('Export failed:', error);
-      // You can add toast notification here
+      // Snackbar thông báo lỗi đã được xử lý trong exportToPDF
     }
-  }, [selectedSeries]);
+  }, []);
 
   return (
     <Card sx={sx} {...other}>
