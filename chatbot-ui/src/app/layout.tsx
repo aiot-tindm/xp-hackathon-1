@@ -1,4 +1,5 @@
 import 'src/global.css';
+import 'src/lib/crypto-polyfill';
 
 import type { Metadata, Viewport } from 'next';
 

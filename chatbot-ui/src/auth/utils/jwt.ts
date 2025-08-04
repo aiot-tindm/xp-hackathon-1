@@ -1,3 +1,5 @@
+import 'src/lib/crypto-polyfill';
+
 import { SignJWT, jwtVerify } from 'jose';
 
 // ----------------------------------------------------------------------

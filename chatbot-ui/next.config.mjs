@@ -26,6 +26,13 @@ const nextConfig = {
       use: ['@svgr/webpack'],
     });
 
+    // Ensure proper crypto handling
+    if (config.resolve.fallback) {
+      config.resolve.fallback.crypto = false;
+    } else {
+      config.resolve.fallback = { crypto: false };
+    }
+
     return config;
   },
   ...(isStaticExport === 'true' && {
