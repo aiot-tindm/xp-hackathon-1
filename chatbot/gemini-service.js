@@ -1,5 +1,5 @@
 const { createPartFromUri, createUserContent, GoogleGenAI } = require('@google/genai');
-const { getItemList, getOrderList, getCustomerList, getSalesAnalytics, getInventoryAnalytics, getRevenueAnalytics } = require('./api-service');
+const { getItemList, getOrderList, getCustomerList, getSalesAnalytics, getInventoryAnalytics, getRevenueAnalytics, getAnalytics } = require('./api-service');
 require('dotenv').config();
 
 class GeminiService {
@@ -71,6 +71,7 @@ class GeminiService {
                         - Use clear and concise bullet points or table format.
                         - Avoid flowery or poetic language. Keep the tone professional and data-focused.
                         - For forecasts, base the analysis only on trends visible in the provided data. Do not guess.
+                        - 📌 Always respond in English, regardless of the question language or dataset content.
  
                     `;
 
@@ -152,6 +153,12 @@ class GeminiService {
 
             const revenue = await getRevenueAnalytics();
             await this.uploadFile(revenue.data, 'revenueAnalytics');
+
+
+            const dataAnalytics = await getAnalytics();
+            // console.log('inventory anlyze', JSON.stringify(dataAnalytics.data))
+            await this.uploadFile(dataAnalytics.data, 'inventoryAnalysis-30-6-2024');
+
 
             console.log('📈 Data summary:', {
                 items: items?.length ?? 0,

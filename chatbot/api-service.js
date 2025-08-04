@@ -168,6 +168,29 @@ async function getRevenueAnalytics() {
     }
 }
 
+async function getAnalytics() {
+    try {
+        if (!process.env.ENDPOINT_INVENTORY_SERVICE) {
+            console.error("❌ ENDPOINT_INVENTORY_SERVICE environment variable not set");
+            return {};
+        }
+
+        const res = await fetch(`${process.env.ENDPOINT_INVENTORY_SERVICE}/api/summary/all?date=2024-06-30`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!res.ok) throw new Error(`Status: ${res.status}`);
+
+        return res.json();
+    } catch (err) {
+        console.error("❌ Lỗi khi gọi API:", err.message);
+        return {};
+    }
+}
+
 module.exports = {
     getItemList,
     getOrderList,
@@ -175,4 +198,5 @@ module.exports = {
     getSalesAnalytics,
     getInventoryAnalytics,
     getRevenueAnalytics,
+    getAnalytics
 };
