@@ -83,8 +83,14 @@ app.listen(PORT, async () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
   console.log(`📚 Swagger Documentation: http://localhost:${PORT}/api-docs`);
   
-  // Test database connection
-  await testConnection();
+  // Test database connection (optional)
+  try {
+    await testConnection();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.log(`⚠️  Database connection failed (optional): ${errorMessage}`);
+    console.log(`📝 Service will continue without database connection`);
+  }
   
   console.log(`📝 API Documentation:`);
   console.log(`   GET /api/health - Health check`);
