@@ -10,10 +10,10 @@ RUN npm install
 COPY . .
 
 # Build ứng dụng
-# RUN npm run build
+RUN npm run build
 
 # Expose port
 EXPOSE 8082
 
 # Chạy ứng dụng
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]

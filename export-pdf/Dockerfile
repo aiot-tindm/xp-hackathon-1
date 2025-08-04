@@ -14,6 +14,8 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
+ENV PORT=3000
+
 # Copy package files
 COPY package.json ./
 
