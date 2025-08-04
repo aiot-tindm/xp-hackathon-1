@@ -5,8 +5,8 @@ require('dotenv').config();
 async function fetchAllPaginatedData(endpoint, dataKey = 'items', limit = 100) {
     const allData = [];
 
-    if (!process.env.ENDPOINT_CUSTOMER_SERVICE) {
-        console.error("❌ ENDPOINT_CUSTOMER_SERVICE environment variable not set");
+    if (!process.env.ENDPOINT_DATA_SERVICE) {
+        console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
         return [];
     }
 
@@ -14,7 +14,7 @@ async function fetchAllPaginatedData(endpoint, dataKey = 'items', limit = 100) {
 
     try {
         while (true) {
-            const url = `${process.env.ENDPOINT_CUSTOMER_SERVICE}${endpoint}?page=${page}&limit=${limit}`;
+            const url = `${process.env.ENDPOINT_DATA_SERVICE}${endpoint}?page=${page}&limit=${limit}`;
             const res = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -45,18 +45,18 @@ async function fetchAllPaginatedData(endpoint, dataKey = 'items', limit = 100) {
 
 
 async function getItemList() {
-    return await fetchAllPaginatedData('/api/items', 'items');
+    return await fetchAllPaginatedData('/customer-service/api/items', 'items');
 
 }
 
 async function getOrderList() {
     // try {
-    //     if (!process.env.ENDPOINT_CUSTOMER_SERVICE) {
-    //         console.error("❌ ENDPOINT_CUSTOMER_SERVICE environment variable not set");
+    //     if (!process.env.ENDPOINT_DATA_SERVICE) {
+    //         console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
     //         return [];
     //     }
 
-    //     const res = await fetch(`${process.env.ENDPOINT_CUSTOMER_SERVICE}/api/orders`, {
+    //     const res = await fetch(`${process.env.ENDPOINT_DATA_SERVICE}/api/orders`, {
     //         method: 'GET',
     //         headers: {
     //             'Content-Type': 'application/json'
@@ -70,18 +70,18 @@ async function getOrderList() {
     //     console.error("❌ Lỗi khi gọi API:", err.message);
     //     return [];
     // }
-    return await fetchAllPaginatedData('/api/orders', 'orders');
+    return await fetchAllPaginatedData('/customer-service/api/orders', 'orders');
 
 }
 
 async function getCustomerList() {
     // try {
-    //     if (!process.env.ENDPOINT_CUSTOMER_SERVICE) {
-    //         console.error("❌ ENDPOINT_CUSTOMER_SERVICE environment variable not set");
+    //     if (!process.env.ENDPOINT_DATA_SERVICE) {
+    //         console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
     //         return [];
     //     }
 
-    //     const res = await fetch(`${process.env.ENDPOINT_CUSTOMER_SERVICE}/api/customers`, {
+    //     const res = await fetch(`${process.env.ENDPOINT_DATA_SERVICE}/api/customers`, {
     //         method: 'GET',
     //         headers: {
     //             'Content-Type': 'application/json'
@@ -95,18 +95,18 @@ async function getCustomerList() {
     //     console.error("❌ Lỗi khi gọi API:", err.message);
     //     return [];
     // }
-    return await fetchAllPaginatedData('/api/customers', 'customers');
+    return await fetchAllPaginatedData('/customer-service/api/customers', 'customers');
 
 }
 
 async function getSalesAnalytics() {
     try {
-        if (!process.env.ENDPOINT_CUSTOMER_SERVICE) {
-            console.error("❌ ENDPOINT_CUSTOMER_SERVICE environment variable not set");
+        if (!process.env.ENDPOINT_DATA_SERVICE) {
+            console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
             return {};
         }
 
-        const res = await fetch(`${process.env.ENDPOINT_CUSTOMER_SERVICE}/api/analytics/sales`, {
+        const res = await fetch(`${process.env.ENDPOINT_DATA_SERVICE}/customer-service/api/analytics/sales`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -124,12 +124,12 @@ async function getSalesAnalytics() {
 
 async function getInventoryAnalytics() {
     try {
-        if (!process.env.ENDPOINT_CUSTOMER_SERVICE) {
-            console.error("❌ ENDPOINT_CUSTOMER_SERVICE environment variable not set");
+        if (!process.env.ENDPOINT_DATA_SERVICE) {
+            console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
             return {};
         }
 
-        const res = await fetch(`${process.env.ENDPOINT_CUSTOMER_SERVICE}/api/analytics/inventory`, {
+        const res = await fetch(`${process.env.ENDPOINT_DATA_SERVICE}/customer-service/api/analytics/inventory`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -147,12 +147,12 @@ async function getInventoryAnalytics() {
 
 async function getRevenueAnalytics() {
     try {
-        if (!process.env.ENDPOINT_CUSTOMER_SERVICE) {
-            console.error("❌ ENDPOINT_CUSTOMER_SERVICE environment variable not set");
+        if (!process.env.ENDPOINT_DATA_SERVICE) {
+            console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
             return {};
         }
 
-        const res = await fetch(`${process.env.ENDPOINT_CUSTOMER_SERVICE}/api/analytics/revenue`, {
+        const res = await fetch(`${process.env.ENDPOINT_DATA_SERVICE}/customer-service/api/analytics/revenue`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -170,12 +170,12 @@ async function getRevenueAnalytics() {
 
 async function getAnalytics() {
     try {
-        if (!process.env.ENDPOINT_INVENTORY_SERVICE) {
-            console.error("❌ ENDPOINT_INVENTORY_SERVICE environment variable not set");
+        if (!process.env.ENDPOINT_DATA_SERVICE) {
+            console.error("❌ ENDPOINT_DATA_SERVICE environment variable not set");
             return {};
         }
 
-        const res = await fetch(`${process.env.ENDPOINT_INVENTORY_SERVICE}/api/summary/all`, {
+        const res = await fetch(`${process.env.ENDPOINT_DATA_SERVICE}/analysis-inventory/api/summary/all`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
