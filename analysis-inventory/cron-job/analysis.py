@@ -5,6 +5,9 @@ Thực hiện phân tích dữ liệu và lưu vào các bảng summary
 """
 
 import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 from datetime import datetime, timedelta
 import logging
 from typing import Dict, List, Tuple
@@ -22,7 +25,7 @@ from package.models.models import (
     create_db_engine, create_session, 
     Brand, Category, Item, Batch, Order, OrderItem, Base,
     DailySalesSummary, TopSellingItem, CategorySummary, 
-    BrandSummary, RefundAnalysis, LowStockAlert, SlowMovingItem
+    BrandSummary, RefundAnalysis, LowStockAlert, SlowMovingItem, RevenuePrediction
 )
 
 # Cấu hình logging
@@ -727,10 +730,258 @@ class AnalyticsDataEngine:
         
         return results
 
+    def predict_next_month_revenue(self) -> Dict:
+        """Dự đoán doanh thu tháng tới sử dụng machine learning"""
+        self.logger.info("Dự đoán doanh thu tháng tới với ML...")
+        
+        # Lấy dữ liệu bán hàng hợp lệ (không refund)
+        valid_orders = []
+        for order in self.orders:
+            if order.status != 'refunded':
+                for order_item in order.order_items:
+                    revenue = float(order_item.price_per_unit) * order_item.quantity
+                    valid_orders.append({
+                        'date': order.order_date.date(),
+                        'revenue': revenue,
+                        'quantity': order_item.quantity,
+                        'weekday': order.order_date.weekday(),
+                        'month': order.order_date.month,
+                        'day': order.order_date.day
+                    })
+        
+        if not valid_orders:
+            return {
+                'success': False,
+                'message': 'Không có đủ dữ liệu để dự đoán'
+            }
+        
+        # Tạo DataFrame
+        df = pd.DataFrame(valid_orders)
+        
+        # Nhóm theo ngày và tính tổng doanh thu
+        daily_revenue = df.groupby('date')['revenue'].sum().reset_index()
+        daily_revenue['date'] = pd.to_datetime(daily_revenue['date'])
+        daily_revenue = daily_revenue.sort_values('date')
+        
+        # Tính các features cho ML
+        daily_revenue['weekday'] = daily_revenue['date'].dt.weekday
+        daily_revenue['month'] = daily_revenue['date'].dt.month
+        daily_revenue['day'] = daily_revenue['date'].dt.day
+        daily_revenue['day_of_year'] = daily_revenue['date'].dt.dayofyear
+        
+        # Tính moving averages
+        daily_revenue['ma_7'] = daily_revenue['revenue'].rolling(window=7).mean()
+        daily_revenue['ma_14'] = daily_revenue['revenue'].rolling(window=14).mean()
+        daily_revenue['ma_30'] = daily_revenue['revenue'].rolling(window=30).mean()
+        
+        # Tính growth rate
+        daily_revenue['growth_rate'] = daily_revenue['revenue'].pct_change()
+        
+        # Tính volatility
+        daily_revenue['volatility'] = daily_revenue['revenue'].rolling(window=7).std()
+        
+        # Loại bỏ NaN values
+        daily_revenue = daily_revenue.dropna()
+        
+        if len(daily_revenue) < 14:
+            return {
+                'success': False,
+                'message': 'Cần ít nhất 14 ngày dữ liệu để dự đoán'
+            }
+        
+        # Chuẩn bị features cho ML
+        features = ['weekday', 'month', 'day', 'day_of_year', 'ma_7', 'ma_14', 'ma_30', 'growth_rate', 'volatility']
+        X = daily_revenue[features].fillna(0)
+        y = daily_revenue['revenue']
+        
+        # Chuẩn hóa dữ liệu
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        
+        # Train model
+        model = LinearRegression()
+        model.fit(X_scaled, y)
+        
+        # Tính R-squared score
+        r2_score = model.score(X_scaled, y)
+        
+        # Tạo dữ liệu dự đoán cho 30 ngày tới
+        last_date = daily_revenue['date'].max()
+        future_dates = pd.date_range(start=last_date + timedelta(days=1), periods=30, freq='D')
+        
+        future_data = []
+        for date in future_dates:
+            future_data.append({
+                'date': date,
+                'weekday': date.weekday(),
+                'month': date.month,
+                'day': date.day,
+                'day_of_year': date.dayofyear,
+                'ma_7': daily_revenue['ma_7'].iloc[-1] if len(daily_revenue) > 0 else 0,
+                'ma_14': daily_revenue['ma_14'].iloc[-1] if len(daily_revenue) > 0 else 0,
+                'ma_30': daily_revenue['ma_30'].iloc[-1] if len(daily_revenue) > 0 else 0,
+                'growth_rate': daily_revenue['growth_rate'].iloc[-1] if len(daily_revenue) > 0 else 0,
+                'volatility': daily_revenue['volatility'].iloc[-1] if len(daily_revenue) > 0 else 0
+            })
+        
+        future_df = pd.DataFrame(future_data)
+        X_future = future_df[features].fillna(0)
+        X_future_scaled = scaler.transform(X_future)
+        
+        # Dự đoán
+        predictions = model.predict(X_future_scaled)
+        
+        # Tính các chỉ số thống kê
+        avg_daily_revenue = daily_revenue['revenue'].mean()
+        std_daily_revenue = daily_revenue['revenue'].std()
+        total_historical_revenue = daily_revenue['revenue'].sum()
+        
+        # Dự đoán tổng tháng tới
+        total_predicted_revenue = np.sum(predictions)
+        
+        # Tính confidence intervals
+        confidence_interval = 1.96 * std_daily_revenue * np.sqrt(30)  # 95% CI
+        
+        # Phân tích xu hướng
+        recent_avg = daily_revenue['revenue'].tail(7).mean()
+        older_avg = daily_revenue['revenue'].head(7).mean() if len(daily_revenue) >= 14 else recent_avg
+        
+        trend = ((recent_avg - older_avg) / older_avg * 100) if older_avg > 0 else 0
+        
+        # Phân tích theo ngày trong tuần
+        weekday_analysis = daily_revenue.groupby('weekday')['revenue'].agg(['mean', 'std']).to_dict()
+        
+        # Tính accuracy metrics
+        if len(daily_revenue) >= 30:
+            # Sử dụng 70% dữ liệu để train, 30% để test
+            split_idx = int(len(daily_revenue) * 0.7)
+            X_train = X_scaled[:split_idx]
+            y_train = y[:split_idx]
+            X_test = X_scaled[split_idx:]
+            y_test = y[split_idx:]
+            
+            model_test = LinearRegression()
+            model_test.fit(X_train, y_train)
+            test_predictions = model_test.predict(X_test)
+            
+            # Tính MAPE (Mean Absolute Percentage Error)
+            mape = np.mean(np.abs((y_test.values - test_predictions) / y_test.values)) * 100
+        else:
+            mape = None
+        
+        return {
+            'success': True,
+            'analysis_date': self.analysis_date,
+            'prediction_period': 'next_month',
+            'prediction_days': 30,
+            'historical_analysis': {
+                'total_revenue': float(total_historical_revenue),
+                'avg_daily_revenue': float(avg_daily_revenue),
+                'std_daily_revenue': float(std_daily_revenue),
+                'data_days': len(daily_revenue),
+                'trend_percentage': float(trend),
+                'r2_score': float(r2_score),
+                'mape': float(mape) if mape is not None else None
+            },
+            'predictions': {
+                'total_predicted_revenue': float(total_predicted_revenue),
+                'avg_daily_prediction': float(total_predicted_revenue / 30),
+                'confidence_interval': float(confidence_interval),
+                'lower_bound': float(total_predicted_revenue - confidence_interval),
+                'upper_bound': float(total_predicted_revenue + confidence_interval)
+            },
+            'daily_predictions': [
+                {
+                    'date': future_dates[i].strftime('%Y-%m-%d'),
+                    'predicted_revenue': float(predictions[i]),
+                    'weekday': future_dates[i].strftime('%A')
+                } for i in range(len(predictions))
+            ],
+            'weekday_analysis': weekday_analysis,
+            'model_info': {
+                'algorithm': 'Linear Regression',
+                'features_used': features,
+                'data_points': len(daily_revenue),
+                'confidence_level': min(95, max(60, 80 + (r2_score * 20)))
+            },
+            'risk_assessment': {
+                'high_volatility': std_daily_revenue > avg_daily_revenue * 0.5,
+                'negative_trend': trend < -10,
+                'low_confidence': r2_score < 0.3,
+                'insufficient_data': len(daily_revenue) < 30
+            }
+        }
+
+    def save_revenue_prediction(self, prediction_data: Dict):
+        """Lưu dự đoán doanh thu vào database"""
+        session = self.get_session()
+        try:
+            import json
+            
+            # Xóa dữ liệu cũ cho ngày này và period này
+            session.query(RevenuePrediction).filter(
+                and_(
+                    RevenuePrediction.analysis_date == self.analysis_date,
+                    RevenuePrediction.prediction_period == prediction_data['prediction_period']
+                )
+            ).delete()
+            
+            # Tạo bản ghi mới
+            prediction = RevenuePrediction(
+                analysis_date=self.analysis_date,
+                prediction_period=prediction_data['prediction_period'],
+                prediction_days=prediction_data['prediction_days'],
+                
+                # Historical data
+                total_historical_revenue=Decimal(str(prediction_data['historical_analysis']['total_revenue'])),
+                avg_daily_revenue=Decimal(str(prediction_data['historical_analysis']['avg_daily_revenue'])),
+                std_daily_revenue=Decimal(str(prediction_data['historical_analysis']['std_daily_revenue'])),
+                data_days=prediction_data['historical_analysis']['data_days'],
+                trend_percentage=Decimal(str(prediction_data['historical_analysis']['trend_percentage'])),
+                r2_score=Decimal(str(prediction_data['historical_analysis']['r2_score'])),
+                mape=Decimal(str(prediction_data['historical_analysis']['mape'])) if prediction_data['historical_analysis']['mape'] is not None else Decimal('0'),
+                
+                # Predictions
+                total_predicted_revenue=Decimal(str(prediction_data['predictions']['total_predicted_revenue'])),
+                avg_daily_prediction=Decimal(str(prediction_data['predictions']['avg_daily_prediction'])),
+                confidence_interval=Decimal(str(prediction_data['predictions']['confidence_interval'])),
+                lower_bound=Decimal(str(prediction_data['predictions']['lower_bound'])),
+                upper_bound=Decimal(str(prediction_data['predictions']['upper_bound'])),
+                
+                # Model info
+                algorithm=prediction_data['model_info']['algorithm'],
+                features_used=json.dumps(prediction_data['model_info']['features_used']),
+                data_points=prediction_data['model_info']['data_points'],
+                confidence_level=Decimal(str(prediction_data['model_info']['confidence_level'])),
+                
+                # Risk assessment
+                high_volatility=prediction_data['risk_assessment']['high_volatility'],
+                negative_trend=prediction_data['risk_assessment']['negative_trend'],
+                low_confidence=prediction_data['risk_assessment']['low_confidence'],
+                insufficient_data=prediction_data['risk_assessment']['insufficient_data'],
+                
+                # JSON data
+                daily_predictions=json.dumps(prediction_data['daily_predictions']),
+                weekday_analysis=json.dumps(prediction_data['weekday_analysis'])
+            )
+            
+            session.add(prediction)
+            session.commit()
+            
+            self.logger.info(f"Đã lưu dự đoán doanh thu cho {prediction_data['prediction_period']}")
+            
+        except Exception as e:
+            session.rollback()
+            self.logger.error(f"Lỗi lưu dự đoán doanh thu: {e}")
+            raise
+        finally:
+            session.close()
+
     def run_all_analysis(self):
         """Chạy phân tích cho tất cả các khoảng thời gian"""
         self.logger.info("Bắt đầu chạy analysis cho tất cả các khoảng thời gian...")
         print("\n🚀 BẮT ĐẦU PHÂN TÍCH DỮ LIỆU...")
+        print("\n🚀 NGÀY B...")
         print("="*60)
         
         # Phân tích doanh số
@@ -805,6 +1056,23 @@ class AnalyticsDataEngine:
         
         print("\n" + "="*60)
         print("🎉 HOÀN THÀNH TẤT CẢ PHÂN TÍCH!")
+        print("="*60)
+        
+        # Dự đoán doanh thu tháng tới
+        print("\n🔮 Dự đoán doanh thu tháng tới...")
+        try:
+            revenue_prediction = self.predict_next_month_revenue()
+            if revenue_prediction.get('success', True):
+                self.save_revenue_prediction(revenue_prediction)
+                print(f"   ✅ Đã lưu dự đoán doanh thu: {revenue_prediction['predictions']['total_predicted_revenue']:,.0f} VNĐ")
+            else:
+                print(f"   ❌ Lỗi dự đoán: {revenue_prediction.get('message', 'Unknown error')}")
+        except Exception as e:
+            self.logger.error(f"Lỗi khi dự đoán doanh thu: {e}")
+            print(f"   ❌ Lỗi dự đoán doanh thu: {e}")
+        
+        print("\n" + "="*60)
+        print("🎉 HOÀN THÀNH TẤT CẢ PHÂN TÍCH VÀ DỰ ĐOÁN!")
         print("="*60)
 
     # Save methods

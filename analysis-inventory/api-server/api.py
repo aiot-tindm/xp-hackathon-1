@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from package.models.models import (
     create_db_engine, create_session,
     DailySalesSummary, TopSellingItem, CategorySummary, 
-    BrandSummary, RefundAnalysis, LowStockAlert, SlowMovingItem
+    BrandSummary, RefundAnalysis, LowStockAlert, SlowMovingItem, RevenuePrediction
 )
 import logging
 
@@ -51,6 +51,7 @@ def home():
             'slow_moving_items': '/api/slow-moving-items',
             'summary_overview': '/api/summary/overview',
             'summary_all': '/api/summary/all',
+            'revenue_prediction': '/api/revenue-prediction',
             'available_periods': '/api/summary/periods',
             'available_dates': '/api/summary/dates'
         },
@@ -1103,6 +1104,79 @@ def get_comprehensive_summary():
             'message': f'Lỗi server: {str(e)}'
         }), 500
 
+@app.route('/api/revenue-prediction')
+def get_revenue_prediction():
+    """Lấy dự đoán doanh thu tháng tới từ database"""
+    try:
+        import json
+        
+        session = create_session()
+        
+        # Lấy dự đoán mới nhất
+        latest_prediction = session.query(RevenuePrediction).filter(
+            RevenuePrediction.prediction_period == 'next_month'
+        ).order_by(desc(RevenuePrediction.analysis_date)).first()
+        
+        if not latest_prediction:
+            return jsonify({
+                'success': False,
+                'message': 'Không có dữ liệu dự đoán doanh thu'
+            }), 404
+        
+        # Parse JSON data
+        daily_predictions = json.loads(latest_prediction.daily_predictions) if latest_prediction.daily_predictions else []
+        weekday_analysis = json.loads(latest_prediction.weekday_analysis) if latest_prediction.weekday_analysis else {}
+        features_used = json.loads(latest_prediction.features_used) if latest_prediction.features_used else []
+        
+        data = {
+            'success': True,
+            'analysis_date': latest_prediction.analysis_date.isoformat(),
+            'prediction_period': latest_prediction.prediction_period,
+            'prediction_days': latest_prediction.prediction_days,
+            'historical_analysis': {
+                'total_revenue': float(latest_prediction.total_historical_revenue),
+                'avg_daily_revenue': float(latest_prediction.avg_daily_revenue),
+                'std_daily_revenue': float(latest_prediction.std_daily_revenue),
+                'data_days': latest_prediction.data_days,
+                'trend_percentage': float(latest_prediction.trend_percentage),
+                'r2_score': float(latest_prediction.r2_score),
+                'mape': float(latest_prediction.mape) if latest_prediction.mape > 0 else None
+            },
+            'predictions': {
+                'total_predicted_revenue': float(latest_prediction.total_predicted_revenue),
+                'avg_daily_prediction': float(latest_prediction.avg_daily_prediction),
+                'confidence_interval': float(latest_prediction.confidence_interval),
+                'lower_bound': float(latest_prediction.lower_bound),
+                'upper_bound': float(latest_prediction.upper_bound)
+            },
+            'daily_predictions': daily_predictions,
+            'weekday_analysis': weekday_analysis,
+            'model_info': {
+                'algorithm': latest_prediction.algorithm,
+                'features_used': features_used,
+                'data_points': latest_prediction.data_points,
+                'confidence_level': float(latest_prediction.confidence_level)
+            },
+            'risk_assessment': {
+                'high_volatility': latest_prediction.high_volatility,
+                'negative_trend': latest_prediction.negative_trend,
+                'low_confidence': latest_prediction.low_confidence,
+                'insufficient_data': latest_prediction.insufficient_data
+            },
+            'created_at': latest_prediction.created_at.isoformat() if latest_prediction.created_at else None,
+            'updated_at': latest_prediction.updated_at.isoformat() if latest_prediction.updated_at else None
+        }
+        
+        session.close()
+        return jsonify(data)
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi lấy dự đoán doanh thu: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Lỗi server: {str(e)}'
+        }), 500
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -1132,6 +1206,7 @@ if __name__ == '__main__':
     print("   - GET /api/slow-moving-items")
     print("   - GET /api/summary/overview")
     print("   - GET /api/summary/all")
+    print("   - GET /api/revenue-prediction")
     print("   - GET /api/summary/periods")
     print("   - GET /api/summary/dates")
     print("\n Server đang chạy tại: http://localhost:5000")

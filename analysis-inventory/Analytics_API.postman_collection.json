@@ -1233,6 +1233,27 @@
 			"description": "API endpoints cho phân tích hàng bán ế (Slow Moving Items)"
 		},
 		{
+			"name": "Revenue Prediction",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/revenue-prediction",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"revenue-prediction"
+					]
+				},
+				"description": "Lấy dự đoán doanh thu tháng tới từ database"
+			},
+			"response": []
+		},
+		{
 			"name": "Error Cases",
 			"item": [
 				{
