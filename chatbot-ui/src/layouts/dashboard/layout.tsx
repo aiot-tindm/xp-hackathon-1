@@ -127,9 +127,6 @@ export function DashboardLayout({
           {/** @slot Language popover */}
           <LanguagePopover data={allLangs} />
 
-          {/** @slot Settings button */}
-          <SettingsButton />
-
           {/** @slot Account drawer */}
           <AccountDrawer data={_account} />
         </Box>
