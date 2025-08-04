@@ -25,7 +25,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { sendAnalyticsQuery, createAnalyticsMessage, exportDataToPdf, type ExportRequest } from 'src/actions/analytics-chatbot';
 
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
@@ -39,6 +38,7 @@ export function AnalyticsChatView() {
   const [isLoading, setIsLoading] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [currentRequestController, setCurrentRequestController] = useState<AbortController | null>(null);
   const [exportRequest, setExportRequest] = useState<ExportRequest>({
     type: 'best_seller',
     format: 'pdf',
@@ -61,22 +61,32 @@ export function AnalyticsChatView() {
     const userMessage = createAnalyticsMessage(inputMessage, true);
     const currentInput = inputMessage;
     
+    // Create abort controller for this request
+    const abortController = new AbortController();
+    setCurrentRequestController(abortController);
+
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const response = await sendAnalyticsQuery(currentInput);
+      const response = await sendAnalyticsQuery(currentInput, abortController);
       const botMessage = createAnalyticsMessage(response, false);
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      const errorMessage = createAnalyticsMessage(
-        error instanceof Error ? error.message : 'Sorry, I encountered an error processing your request.',
-        false
-      );
-      setMessages(prev => [...prev, errorMessage]);
+      if (error instanceof Error && error.name === 'AbortError') {
+        const cancelMessage = createAnalyticsMessage('Request cancelled by user.', false);
+        setMessages(prev => [...prev, cancelMessage]);
+      } else {
+        const errorMessage = createAnalyticsMessage(
+          error instanceof Error ? error.message : 'Sorry, I encountered an error processing your request.',
+          false
+        );
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
       setIsLoading(false);
+      setCurrentRequestController(null);
     }
   }, [inputMessage, isLoading]);
 
@@ -98,6 +108,14 @@ export function AnalyticsChatView() {
   const handleExportRequestChange = useCallback((field: keyof ExportRequest, value: any) => {
     setExportRequest(prev => ({ ...prev, [field]: value }));
   }, []);
+
+  const handleCancelRequest = useCallback(() => {
+    if (currentRequestController) {
+      currentRequestController.abort();
+      setCurrentRequestController(null);
+      setIsLoading(false);
+    }
+  }, [currentRequestController]);
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);
@@ -137,8 +155,28 @@ export function AnalyticsChatView() {
 
         <Card sx={{ height: 600, display: 'flex', flexDirection: 'column' }}>
           {/* Messages */}
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Scrollbar sx={{ flex: 1, p: 3 }}>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+            <Box sx={{ 
+              flex: 1, 
+              p: 3, 
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              minHeight: 0,
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'rgba(0,0,0,0.1)',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: 'rgba(0,0,0,0.3)',
+                borderRadius: '4px',
+                '&:hover': {
+                  background: 'rgba(0,0,0,0.4)',
+                },
+              },
+            }}>
               <Stack spacing={2}>
                 {messages.map((message) => (
                   <Box
@@ -180,12 +218,26 @@ export function AnalyticsChatView() {
                       <Typography variant="body2" color="text.secondary">
                         Analyzing your data...
                       </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={handleCancelRequest}
+                        sx={{ 
+                          ml: 1,
+                          color: 'text.secondary',
+                          '&:hover': {
+                            color: 'error.main',
+                            backgroundColor: 'error.lighter',
+                          }
+                        }}
+                      >
+                        <Iconify icon="solar:close-circle-bold" width={16} />
+                      </IconButton>
                     </Box>
                   </Box>
                 )}
               </Stack>
               <div ref={messagesEndRef} />
-            </Scrollbar>
+            </Box>
           </Box>
 
           {/* Input */}
@@ -248,7 +300,6 @@ export function AnalyticsChatView() {
                 key={question}
                 component="button"
                 onClick={() => setInputMessage(question)}
-                disabled={isLoading}
                 sx={{
                   p: 1.5,
                   border: 1,
@@ -260,10 +311,6 @@ export function AnalyticsChatView() {
                   '&:hover': {
                     borderColor: 'primary.main',
                     backgroundColor: 'primary.lighter',
-                  },
-                  '&:disabled': {
-                    opacity: 0.5,
-                    cursor: 'not-allowed',
                   },
                 }}
               >

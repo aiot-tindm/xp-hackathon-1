@@ -6,7 +6,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
@@ -40,6 +39,7 @@ export function FloatingChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [currentRequestController, setCurrentRequestController] = useState<AbortController | null>(null);
   const [exportRequest, setExportRequest] = useState<ExportRequest>({
     type: 'best_seller',
     format: 'pdf',
@@ -66,22 +66,32 @@ export function FloatingChatWidget() {
     const userMessage = createAnalyticsMessage(inputMessage, true);
     const currentInput = inputMessage;
 
+    // Create abort controller for this request
+    const abortController = new AbortController();
+    setCurrentRequestController(abortController);
+
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const response = await sendAnalyticsQuery(currentInput);
+      const response = await sendAnalyticsQuery(currentInput, abortController);
       const botMessage = createAnalyticsMessage(response, false);
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      const errorMessage = createAnalyticsMessage(
-        error instanceof Error ? error.message : 'Sorry, I encountered an error processing your request.',
-        false
-      );
-      setMessages(prev => [...prev, errorMessage]);
+      if (error instanceof Error && error.name === 'AbortError') {
+        const cancelMessage = createAnalyticsMessage('Request cancelled by user.', false);
+        setMessages(prev => [...prev, cancelMessage]);
+      } else {
+        const errorMessage = createAnalyticsMessage(
+          error instanceof Error ? error.message : 'Sorry, I encountered an error processing your request.',
+          false
+        );
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
       setIsLoading(false);
+      setCurrentRequestController(null);
     }
   }, [inputMessage, isLoading]);
 
@@ -124,6 +134,14 @@ export function FloatingChatWidget() {
       setIsExporting(false);
     }
   }, [exportRequest]);
+
+  const handleCancelRequest = useCallback(() => {
+    if (currentRequestController) {
+      currentRequestController.abort();
+      setCurrentRequestController(null);
+      setIsLoading(false);
+    }
+  }, [currentRequestController]);
 
   const handleQuickQuestion = useCallback((question: string) => {
     setInputMessage(question);
@@ -276,6 +294,22 @@ export function FloatingChatWidget() {
                       <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                         Analyzing...
                       </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={handleCancelRequest}
+                        sx={{ 
+                          ml: 1,
+                          width: 20,
+                          height: 20,
+                          color: 'text.secondary',
+                          '&:hover': {
+                            color: 'error.main',
+                            backgroundColor: 'error.lighter',
+                          }
+                        }}
+                      >
+                        <Iconify icon="solar:close-circle-bold" width={14} />
+                      </IconButton>
                     </Box>
                   </Box>
                 )}
@@ -307,7 +341,6 @@ export function FloatingChatWidget() {
                   size="small"
                   variant="outlined"
                   onClick={() => handleQuickQuestion(question)}
-                  disabled={isLoading}
                   sx={{
                     fontSize: '0.7rem',
                     py: 0.5,

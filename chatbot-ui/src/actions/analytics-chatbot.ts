@@ -71,7 +71,7 @@ export async function exportDataToPdf(request: ExportRequest): Promise<void> {
   }
 }
 
-export async function sendAnalyticsQuery(query: string): Promise<string> {
+export async function sendAnalyticsQuery(query: string, abortController?: AbortController): Promise<string> {
   try {
     const chatUrl = CONFIG.api.chatbotBaseUrl ? CONFIG.api.chatbotBaseUrl + '/api/chat' : '/api/chat';
     const response = await axios.post<AnalyticsResponse>(
@@ -81,7 +81,8 @@ export async function sendAnalyticsQuery(query: string): Promise<string> {
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 240000, // 60 second timeout for AI processing
+        timeout: 60000, // 60 second timeout for AI processing
+        signal: abortController?.signal,
       }
     );
 
