@@ -22,7 +22,7 @@ from package.models.models import (
     create_db_engine, create_session, 
     Brand, Category, Item, Batch, Order, OrderItem, Base,
     DailySalesSummary, TopSellingItem, CategorySummary, 
-    BrandSummary, RefundAnalysis, LowStockAlert
+    BrandSummary, RefundAnalysis, LowStockAlert, SlowMovingItem
 )
 
 # Cấu hình logging
@@ -596,6 +596,116 @@ class AnalyticsDataEngine:
         
         return results
 
+    def analyze_slow_moving_items(self, limit: int = 10, sort_type: str = 'no_sales') -> List[Dict]:
+        """Phân tích hàng bán ế"""
+        self.logger.info(f"Phân tích hàng bán ế theo {sort_type} (top {limit})...")
+        
+        # Lấy tất cả dữ liệu bán hàng hợp lệ (không refund)
+        valid_order_items = []
+        for order in self.orders:
+            if order.status != 'refunded':
+                for order_item in order.order_items:
+                    valid_order_items.append(order_item)
+        
+        # Tìm ngày đơn hàng đầu tiên để tính total_days chính xác
+        first_order_date = min(order.order_date for order in self.orders) if self.orders else self.today
+        total_days = (self.today - first_order_date).days if total_days > 0 else 365
+        
+        # Phân tích từng item
+        slow_moving_analysis = {}
+        
+        for item in self.items:
+            if item.stock_quantity <= 0:
+                continue  # Bỏ qua items hết hàng
+                
+            # Tính tổng số lượng bán trong toàn bộ thời gian
+            total_sold = sum(oi.quantity for oi in valid_order_items if oi.item_id == item.id)
+            
+            # Tính trung bình bán hàng ngày (dựa trên thời gian thực tế)
+            avg_daily_sales = total_sold / total_days if total_days > 0 else 0
+            
+            # Tính số ngày không bán được hàng
+            days_without_sales = total_days - (total_sold if total_sold > 0 else 0)
+            
+            # Tính giá trị tồn kho
+            stock_value = float(item.cost_price) * item.stock_quantity
+            
+            # Tính tiềm năng mất mát (nếu không bán được)
+            potential_loss = stock_value if total_sold == 0 else stock_value * 0.5
+            
+            # Lấy thông tin brand và category
+            brand_name = next((b.name for b in self.brands if b.id == item.brand_id), 'Unknown')
+            category_name = next((c.name for c in self.categories if c.id == item.category_id), 'Unknown')
+            
+            slow_moving_analysis[item.id] = {
+                'sku': item.sku,
+                'item_name': item.name,
+                'brand_name': brand_name,
+                'category_name': category_name,
+                'current_stock': item.stock_quantity,
+                'total_quantity_sold': total_sold,
+                'avg_daily_sales': avg_daily_sales,
+                'days_without_sales': days_without_sales,
+                'stock_value': stock_value,
+                'potential_loss': potential_loss
+            }
+        
+        # Lọc và sắp xếp theo loại được chọn
+        results = []
+        
+        if sort_type == 'no_sales':
+            # Hàng không bán được trong toàn bộ thời gian
+            no_sales_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
+                             if data['total_quantity_sold'] == 0}
+            sorted_items = sorted(no_sales_items.items(), 
+                                key=lambda x: x[1]['stock_value'], reverse=True)[:limit]
+            
+        elif sort_type == 'low_sales':
+            # Hàng bán ít (dưới 5% tồn kho)
+            low_sales_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
+                              if data['total_quantity_sold'] > 0 and 
+                              data['total_quantity_sold'] < data['current_stock'] * 0.05}
+            sorted_items = sorted(low_sales_items.items(), 
+                                key=lambda x: x[1]['potential_loss'], reverse=True)[:limit]
+            
+        elif sort_type == 'high_stock_low_sales':
+            # Hàng có tồn kho cao nhưng bán ít
+            high_stock_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
+                               if data['current_stock'] > 10 and 
+                               data['avg_daily_sales'] < 1}
+            sorted_items = sorted(high_stock_items.items(), 
+                                key=lambda x: x[1]['stock_value'], reverse=True)[:limit]
+            
+        elif sort_type == 'aging_stock':
+            # Hàng tồn kho lâu (không bán được trong 30+ ngày)
+            aging_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
+                          if data['days_without_sales'] >= 30}
+            sorted_items = sorted(aging_items.items(), 
+                                key=lambda x: x[1]['days_without_sales'], reverse=True)[:limit]
+            
+        else:
+            raise ValueError(f"Sort type không hợp lệ: {sort_type}. Chỉ hỗ trợ: no_sales, low_sales, high_stock_low_sales, aging_stock")
+        
+        # Tạo kết quả
+        for rank, (item_id, data) in enumerate(sorted_items, 1):
+            results.append({
+                'analysis_date': self.analysis_date,
+                'sort_type': sort_type,
+                'sku': data['sku'],
+                'item_name': data['item_name'],
+                'brand_name': data['brand_name'],
+                'category_name': data['category_name'],
+                'current_stock': data['current_stock'],
+                'total_quantity_sold': data['total_quantity_sold'],
+                'avg_daily_sales': data['avg_daily_sales'],
+                'days_without_sales': data['days_without_sales'],
+                'stock_value': data['stock_value'],
+                'potential_loss': data['potential_loss'],
+                'rank': rank
+            })
+        
+        return results
+
     def run_all_analysis(self):
         """Chạy phân tích cho tất cả các khoảng thời gian"""
         self.logger.info("Bắt đầu chạy analysis cho tất cả các khoảng thời gian...")
@@ -656,6 +766,15 @@ class AnalyticsDataEngine:
                     refund_analysis = self.analyze_refunds(refund_limit, period_name, refund_type)
                     self.save_refund_analysis(refund_analysis, period_name, refund_type)
                     print(f"      ✅ {refund_type.replace('_', ' ').title()}: {len(refund_analysis)} items")
+
+                # Phân tích hàng bán ế
+                print(f"   📦 Phân tích hàng bán ế...")
+                slow_moving_limit = 20
+                slow_moving_types = ['no_sales', 'low_sales', 'high_stock_low_sales', 'aging_stock']
+                for slow_moving_type in slow_moving_types:
+                    slow_moving_analysis = self.analyze_slow_moving_items(slow_moving_limit, slow_moving_type)
+                    self.save_slow_moving_items(slow_moving_analysis, slow_moving_type)
+                    print(f"      ✅ {slow_moving_type.replace('_', ' ').title()}: {len(slow_moving_analysis)} items")
 
                 print(f"   ✅ Hoàn thành phân tích cho {period_name}")
                 
@@ -914,6 +1033,47 @@ class AnalyticsDataEngine:
         except Exception as e:
             session.rollback()
             self.logger.error(f"Lỗi lưu low stock alerts: {e}")
+            raise
+        finally:
+            session.close()
+
+    def save_slow_moving_items(self, data: List[Dict], sort_type: str = 'no_sales'):
+        """Lưu slow moving items analysis"""
+        session = self.get_session()
+        try:
+            # Xóa dữ liệu cũ cho ngày này và sort_type này
+            session.query(SlowMovingItem).filter(
+                and_(
+                    SlowMovingItem.analysis_date == self.analysis_date,
+                    SlowMovingItem.sort_type == sort_type
+                )
+            ).delete()
+            
+            # Thêm dữ liệu mới
+            for item_data in data:
+                summary = SlowMovingItem(
+                    analysis_date=item_data['analysis_date'],
+                    sort_type=item_data.get('sort_type', sort_type),
+                    sku=item_data['sku'],
+                    item_name=item_data['item_name'],
+                    brand_name=item_data.get('brand_name', ''),
+                    category_name=item_data.get('category_name', ''),
+                    current_stock=item_data['current_stock'],
+                    total_quantity_sold=item_data['total_quantity_sold'],
+                    avg_daily_sales=Decimal(str(item_data['avg_daily_sales'])),
+                    days_without_sales=item_data['days_without_sales'],
+                    stock_value=Decimal(str(item_data['stock_value'])),
+                    potential_loss=Decimal(str(item_data['potential_loss'])),
+                    rank_position=item_data['rank']
+                )
+                session.add(summary)
+            
+            session.commit()
+            self.logger.info(f"Đã lưu {len(data)} slow moving items với sort_type {sort_type}")
+            
+        except Exception as e:
+            session.rollback()
+            self.logger.error(f"Lỗi lưu slow moving items: {e}")
             raise
         finally:
             session.close()

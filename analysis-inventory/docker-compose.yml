@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: analytics_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inventory-sale-ai
+      MYSQL_USER: analytics
+      MYSQL_PASSWORD: analytics123
+      MYSQL_DEFAULT_AUTHENTICATION_PLUGIN: mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - analytics_network
+
+  # Adminer Database Management
+  adminer:
+    image: adminer:standalone
+    container_name: analytics_adminer
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "8088:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+      ADMINER_DESIGN: pepa-linha-dark
+    networks:
+      - analytics_network
+
+  # Cron Job Service (chạy analysis.py hàng ngày)
+  cron-job:
+    build:
+      context: .
+      dockerfile: cron-job/Dockerfile
+    container_name: analytics_cron_job
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      # Database connection
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: analytics
+      DB_PASSWORD: analytics123
+      DB_NAME: inventory-sale-ai
+      # Python settings
+      PYTHONPATH: /app
+      PYTHONUNBUFFERED: 1
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Mount .env file if exists
+      - ./.env:/app/.env:ro
+    networks:
+      - analytics_network
+
+  # API Server Service (cung cấp REST API)
+  api-server:
+    build:
+      context: .
+      dockerfile: api-server/Dockerfile
+    container_name: analytics_api_server
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      # Database connection
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: analytics
+      DB_PASSWORD: analytics123
+      DB_NAME: inventory-sale-ai
+      # Python settings
+      PYTHONPATH: /app
+      PYTHONUNBUFFERED: 1
+      FLASK_ENV: production
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Mount .env file if exists
+      - ./.env:/app/.env:ro
+    networks:
+      - analytics_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  analytics_network:
+    driver: bridge 
