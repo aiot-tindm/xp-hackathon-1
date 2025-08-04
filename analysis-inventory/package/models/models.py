@@ -254,6 +254,53 @@ class SlowMovingItem(Base):
         PrimaryKeyConstraint('analysis_date', 'sort_type', 'sku'),
     )
 
+class RevenuePrediction(Base):
+    """Model cho dự đoán doanh thu"""
+    __tablename__ = 'revenue_predictions'
+    
+    analysis_date = Column(Date, nullable=False)
+    prediction_period = Column(String(50), nullable=False)  # 'next_month', 'next_quarter', etc.
+    prediction_days = Column(Integer, default=30)
+    
+    # Historical data
+    total_historical_revenue = Column(DECIMAL(15,2), default=0)
+    avg_daily_revenue = Column(DECIMAL(15,2), default=0)
+    std_daily_revenue = Column(DECIMAL(15,2), default=0)
+    data_days = Column(Integer, default=0)
+    trend_percentage = Column(DECIMAL(5,2), default=0)
+    r2_score = Column(DECIMAL(5,4), default=0)
+    mape = Column(DECIMAL(5,2), default=0)
+    
+    # Predictions
+    total_predicted_revenue = Column(DECIMAL(15,2), default=0)
+    avg_daily_prediction = Column(DECIMAL(15,2), default=0)
+    confidence_interval = Column(DECIMAL(15,2), default=0)
+    lower_bound = Column(DECIMAL(15,2), default=0)
+    upper_bound = Column(DECIMAL(15,2), default=0)
+    
+    # Model info
+    algorithm = Column(String(100), default='Linear Regression')
+    features_used = Column(Text)  # JSON string of features
+    data_points = Column(Integer, default=0)
+    confidence_level = Column(DECIMAL(5,2), default=0)
+    
+    # Risk assessment
+    high_volatility = Column(Boolean, default=False)
+    negative_trend = Column(Boolean, default=False)
+    low_confidence = Column(Boolean, default=False)
+    insufficient_data = Column(Boolean, default=False)
+    
+    # Daily predictions (stored as JSON)
+    daily_predictions = Column(Text)  # JSON string of daily predictions
+    weekday_analysis = Column(Text)   # JSON string of weekday analysis
+    
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('analysis_date', 'prediction_period'),
+    )
+
 # Database connection functions
 def get_database_url():
     """Get database URL from environment variables"""

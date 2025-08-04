@@ -12,12 +12,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/",
-					"protocol": "http",
+					"raw": "{{base_url}}/",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						""
 					]
@@ -32,12 +30,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/daily-sales",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/daily-sales",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"daily-sales"
@@ -53,12 +49,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/daily-sales/2024-08-01",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/daily-sales/2024-08-01",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"daily-sales",
@@ -75,12 +69,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/daily-sales/period/all_time",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/daily-sales/period/all_time",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"daily-sales",
@@ -98,12 +90,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=revenue&limit=10",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/top-selling-items?period=all_time&sort_type=revenue&limit=10",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"top-selling-items"
@@ -136,12 +126,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=profit&limit=10",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/top-selling-items?period=all_time&sort_type=profit&limit=10",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"top-selling-items"
@@ -174,12 +162,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=quantity&limit=10",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/top-selling-items?period=all_time&sort_type=quantity&limit=10",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"top-selling-items"
@@ -212,12 +198,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/category-summary?period=all_time&sort_type=revenue",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/category-summary?period=all_time&sort_type=revenue",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"category-summary"
@@ -245,12 +229,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/category-summary?period=all_time&sort_type=quantity",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/category-summary?period=all_time&sort_type=quantity",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"category-summary"
@@ -278,12 +260,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/brand-summary?period=all_time&sort_type=revenue",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/brand-summary?period=all_time&sort_type=revenue",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"brand-summary"
@@ -311,12 +291,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/brand-summary?period=all_time&sort_type=quantity",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/brand-summary?period=all_time&sort_type=quantity",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"brand-summary"
@@ -344,12 +322,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_count",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/refund-analysis?period=all_time&sort_type=refund_count",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"refund-analysis"
@@ -377,12 +353,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_rate",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/refund-analysis?period=all_time&sort_type=refund_rate",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"refund-analysis"
@@ -410,12 +384,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_quantity",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/refund-analysis?period=all_time&sort_type=refund_quantity",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"refund-analysis"
@@ -443,12 +415,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/refund-analysis?period=all_time&sort_type=refund_reason",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/refund-analysis?period=all_time&sort_type=refund_reason",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"refund-analysis"
@@ -476,12 +446,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/low-stock-alerts",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/low-stock-alerts",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"low-stock-alerts"
@@ -497,12 +465,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/batch-analysis?period=all_time",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/batch-analysis?period=all_time",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"batch-analysis"
@@ -525,12 +491,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/summary/overview",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/summary/overview",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"summary",
@@ -547,12 +511,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/summary/all",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/summary/all",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"summary",
@@ -569,12 +531,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/summary/all?date=2024-06-30",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/summary/all?date=2024-06-30",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"summary",
@@ -598,12 +558,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/summary/periods",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/summary/periods",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"summary",
@@ -620,12 +578,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/summary/dates",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/summary/dates",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "5000",
 					"path": [
 						"api",
 						"summary",
@@ -633,6 +589,25 @@
 					]
 				},
 				"description": "Lấy danh sách các ngày phân tích có sẵn"
+			},
+			"response": []
+		},
+		{
+			"name": "Revenue Prediction",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/revenue-prediction",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"revenue-prediction"
+					]
+				},
+				"description": "Lấy dự đoán doanh thu tháng tới từ database"
 			},
 			"response": []
 		},
@@ -645,12 +620,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=1_day_ago&sort_type=revenue&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=1_day_ago&sort_type=revenue&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -683,12 +656,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=7_days_ago&sort_type=revenue&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=7_days_ago&sort_type=revenue&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -721,12 +692,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=1_month_ago&sort_type=revenue&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=1_month_ago&sort_type=revenue&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -759,12 +728,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=3_months_ago&sort_type=revenue&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=3_months_ago&sort_type=revenue&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -797,12 +764,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=6_months_ago&sort_type=revenue&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=6_months_ago&sort_type=revenue&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -835,12 +800,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=1_year_ago&sort_type=revenue&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=1_year_ago&sort_type=revenue&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -879,12 +842,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=revenue&limit=5&date=2024-08-01",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=all_time&sort_type=revenue&limit=5&date=2024-08-01",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -922,12 +883,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/brand-summary?period=all_time&sort_type=revenue&date=2024-08-01",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/brand-summary?period=all_time&sort_type=revenue&date=2024-08-01",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"brand-summary"
@@ -960,12 +919,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/low-stock-alerts?date=2024-08-01",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/low-stock-alerts?date=2024-08-01",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"low-stock-alerts"
@@ -994,12 +951,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=no_sales&limit=20",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=no_sales&limit=20",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1027,12 +982,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=low_sales&limit=20",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=low_sales&limit=20",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1060,12 +1013,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=high_stock_low_sales&limit=20",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=high_stock_low_sales&limit=20",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1093,12 +1044,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=aging_stock&limit=20",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=aging_stock&limit=20",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1126,12 +1075,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=no_sales&date=2024-06-30&limit=10",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=no_sales&date=2024-06-30&limit=10",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1164,12 +1111,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=invalid&limit=10",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=invalid&limit=10",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1197,12 +1142,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=no_sales&date=2024-13-01&limit=10",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/slow-moving-items?sort_type=no_sales&date=2024-13-01&limit=10",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"slow-moving-items"
@@ -1241,12 +1184,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/daily-sales/2024-13-01",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/daily-sales/2024-13-01",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"daily-sales",
@@ -1263,12 +1204,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/top-selling-items?period=all_time&sort_type=invalid&limit=5",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/top-selling-items?period=all_time&sort_type=invalid&limit=5",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"top-selling-items"
@@ -1301,12 +1240,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/non-existent",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/non-existent",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"non-existent"
