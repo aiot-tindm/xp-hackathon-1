@@ -744,6 +744,15 @@ class AnalyticsDataEngine:
         low_stock_alerts = self.analyze_low_stock_alerts()
         self.save_low_stock_alerts(low_stock_alerts)
         print(f"   ✅ Đã lưu {len(low_stock_alerts)} cảnh báo tồn kho")
+
+        # Phân tích hàng bán ế
+        print(f"   📦 Phân tích hàng bán ế...")
+        slow_moving_limit = 20
+        slow_moving_types = ['no_sales', 'low_sales', 'high_stock_low_sales', 'aging_stock']
+        for slow_moving_type in slow_moving_types:
+            slow_moving_analysis = self.analyze_slow_moving_items(slow_moving_limit, slow_moving_type)
+            self.save_slow_moving_items(slow_moving_analysis, slow_moving_type)
+            print(f"      ✅ {slow_moving_type.replace('_', ' ').title()}: {len(slow_moving_analysis)} items")
         
         periods = self._get_time_periods()
         
@@ -787,15 +796,6 @@ class AnalyticsDataEngine:
                     refund_analysis = self.analyze_refunds(refund_limit, period_name, refund_type)
                     self.save_refund_analysis(refund_analysis, period_name, refund_type)
                     print(f"      ✅ {refund_type.replace('_', ' ').title()}: {len(refund_analysis)} items")
-
-                # Phân tích hàng bán ế
-                print(f"   📦 Phân tích hàng bán ế...")
-                slow_moving_limit = 20
-                slow_moving_types = ['no_sales', 'low_sales', 'high_stock_low_sales', 'aging_stock']
-                for slow_moving_type in slow_moving_types:
-                    slow_moving_analysis = self.analyze_slow_moving_items(slow_moving_limit, slow_moving_type)
-                    self.save_slow_moving_items(slow_moving_analysis, slow_moving_type)
-                    print(f"      ✅ {slow_moving_type.replace('_', ' ').title()}: {len(slow_moving_analysis)} items")
 
                 print(f"   ✅ Hoàn thành phân tích cho {period_name}")
                 
