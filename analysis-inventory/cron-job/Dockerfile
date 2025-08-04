@@ -1,0 +1,78 @@
+# Dockerfile cho Cron Job Service
+# Chạy analysis.py hàng ngày để phân tích dữ liệu
+
+FROM python:3.11-slim
+
+# Thiết lập metadata
+LABEL maintainer="Analytics Team"
+LABEL description="Docker container cho Cron Job Service - chạy analysis.py hàng ngày"
+
+# Thiết lập working directory
+WORKDIR /app
+
+# Cài đặt system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    cron \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY ../requirements.txt .
+
+# Cài đặt Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy toàn bộ source code
+COPY ../package ./package
+COPY ../cron-job ./cron-job
+
+# Tạo thư mục logs
+RUN mkdir -p /app/logs
+
+# Thiết lập environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Tạo script chạy analysis
+RUN echo '#!/bin/bash\n\
+echo "🚀 Khởi động Analysis System..."\n\
+echo "📊 Chạy analysis.py..."\n\
+cd /app/cron-job\n\
+python analysis.py\n\
+echo "✅ Hoàn thành phân tích!"\n\
+' > /app/run_analysis.sh && chmod +x /app/run_analysis.sh
+
+# Tạo script để trigger analysis từ bên ngoài
+RUN echo '#!/bin/bash\n\
+echo "🔧 Manual trigger analysis..."\n\
+/app/run_analysis.sh\n\
+' > /app/trigger_analysis.sh && chmod +x /app/trigger_analysis.sh
+
+# Tạo script entrypoint với cron
+RUN echo '#!/bin/bash\n\
+echo "🚀 Khởi động Cron Job Service..."\n\
+echo "📅 Thiết lập cron job chạy hàng ngày lúc 11:30 PM (23:30)..."\n\
+echo "🔧 Có thể trigger analysis thủ công bằng lệnh: docker exec analytics_cron_job /app/trigger_analysis.sh"\n\
+\n\
+# Thêm cron job\n\
+echo "30 23 * * * /app/run_analysis.sh >> /app/logs/cron.log 2>&1" > /etc/cron.d/analysis-cron\n\
+chmod 0644 /etc/cron.d/analysis-cron\n\
+crontab /etc/cron.d/analysis-cron\n\
+\n\
+# Chạy analysis lần đầu\n\
+echo "🔍 Chạy phân tích lần đầu..."\n\
+/app/run_analysis.sh\n\
+\n\
+echo "⏰ Cron job đã được thiết lập. Sẽ chạy hàng ngày lúc 11:30 PM (23:30)."\n\
+echo "🔧 Để chạy analysis ngay lập tức, sử dụng:"\n\
+echo "   docker exec analytics_cron_job /app/trigger_analysis.sh"\n\
+echo "📋 Logs sẽ được lưu tại /app/logs/cron.log"\n\
+\n\
+# Khởi động cron daemon\n\
+cron -f\n\
+' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
+# Thiết lập entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"] 

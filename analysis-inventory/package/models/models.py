@@ -225,26 +225,28 @@ class LowStockAlert(Base):
         PrimaryKeyConstraint('analysis_date', 'sku'),
     )
 
-class BatchAnalysis(Base):
-    __tablename__ = 'batch_analysis'
+class SlowMovingItem(Base):
+    """Model cho phân tích hàng bán ế"""
+    __tablename__ = 'slow_moving_items'
     
     analysis_date = Column(Date, nullable=False)
-    data_range = Column(Enum('1_day_ago', '7_days_ago', '1_month_ago', '3_months_ago', '6_months_ago', '1_year_ago', 'all_time'), nullable=False)
-    batch_id = Column(Integer, nullable=False)
+    sort_type = Column(Enum('no_sales', 'low_sales', 'high_stock_low_sales', 'aging_stock'), nullable=False)
     sku = Column(String(100), nullable=False)
     item_name = Column(String(200), nullable=False)
-    import_date = Column(Date, nullable=False)
-    total_quantity = Column(Integer, default=0)
-    remain_quantity = Column(Integer, default=0)
-    sold_quantity = Column(Integer, default=0)
-    utilization_rate = Column(DECIMAL(5,2), default=0)
-    sell_through_rate = Column(DECIMAL(5,2), default=0)
-    days_since_import = Column(Integer, default=0)
+    brand_name = Column(String(200))
+    category_name = Column(String(200))
+    current_stock = Column(Integer, default=0)
+    total_quantity_sold = Column(Integer, default=0)
+    avg_daily_sales = Column(DECIMAL(10,2), default=0)
+    days_without_sales = Column(Integer, default=0)
+    stock_value = Column(DECIMAL(10,2), default=0)
+    potential_loss = Column(DECIMAL(10,2), default=0)
+    rank_position = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
     __table_args__ = (
-        PrimaryKeyConstraint('analysis_date', 'data_range', 'batch_id'),
+        PrimaryKeyConstraint('analysis_date', 'sort_type', 'sku'),
     )
 
 # Database connection functions

@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from package.models.models import (
     create_db_engine, create_session,
     DailySalesSummary, TopSellingItem, CategorySummary, 
-    BrandSummary, RefundAnalysis, LowStockAlert, BatchAnalysis
+    BrandSummary, RefundAnalysis, LowStockAlert, SlowMovingItem
 )
 import logging
 
@@ -48,7 +48,9 @@ def home():
             'refund_analysis': '/api/refund-analysis',
             'low_stock_alerts': '/api/low-stock-alerts',
             'batch_analysis': '/api/batch-analysis',
+            'slow_moving_items': '/api/slow-moving-items',
             'summary_overview': '/api/summary/overview',
+            'summary_all': '/api/summary/all',
             'available_periods': '/api/summary/periods',
             'available_dates': '/api/summary/dates'
         },
@@ -633,6 +635,79 @@ def get_batch_analysis():
             'message': f'Lỗi server: {str(e)}'
         }), 500
 
+@app.route('/api/slow-moving-items')
+def get_slow_moving_items():
+    """Lấy dữ liệu slow moving items"""
+    try:
+        sort_type = request.args.get('sort_type', 'no_sales')
+        date_str = request.args.get('date')
+        limit = request.args.get('limit', 20, type=int)
+        
+        session = create_session()
+        
+        query = session.query(SlowMovingItem).filter(
+            SlowMovingItem.sort_type == sort_type
+        )
+        
+        if date_str:
+            try:
+                target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                query = query.filter(SlowMovingItem.analysis_date == target_date)
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'message': 'Định dạng ngày không hợp lệ'
+                }), 400
+        
+        if not date_str:
+            latest_date = session.query(SlowMovingItem.analysis_date).order_by(
+                desc(SlowMovingItem.analysis_date)
+            ).first()
+            if latest_date:
+                query = query.filter(SlowMovingItem.analysis_date == latest_date[0])
+        
+        items = query.order_by(SlowMovingItem.rank_position).limit(limit).all()
+        
+        if not items:
+            return jsonify({
+                'success': False,
+                'message': f'Không có dữ liệu slow moving items cho sort_type {sort_type}'
+            }), 404
+        
+        data = {
+            'success': True,
+            'sort_type': sort_type,
+            'data': []
+        }
+        
+        for item in items:
+            data['data'].append({
+                'analysis_date': item.analysis_date.isoformat(),
+                'sort_type': item.sort_type,
+                'sku': item.sku,
+                'item_name': item.item_name,
+                'brand_name': item.brand_name,
+                'category_name': item.category_name,
+                'current_stock': item.current_stock,
+                'total_quantity_sold': item.total_quantity_sold,
+                'avg_daily_sales': float(item.avg_daily_sales),
+                'days_without_sales': item.days_without_sales,
+                'stock_value': float(item.stock_value),
+                'potential_loss': float(item.potential_loss),
+                'rank_position': item.rank_position,
+                'created_at': item.created_at.isoformat() if item.created_at else None
+            })
+        
+        session.close()
+        return jsonify(data)
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi lấy slow moving items: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Lỗi server: {str(e)}'
+        }), 500
+
 @app.route('/api/summary/overview')
 def get_summary_overview():
     """Lấy tổng quan dữ liệu summary"""
@@ -806,6 +881,218 @@ def get_available_dates():
             'message': f'Lỗi server: {str(e)}'
         }), 500
 
+@app.route('/api/summary/all')
+def get_comprehensive_summary():
+    """Lấy tổng hợp tất cả data theo từng data range"""
+    try:
+        date_str = request.args.get('date')
+        
+        session = create_session()
+        
+        # Xử lý ngày phân tích
+        if date_str:
+            try:
+                target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'message': 'Định dạng ngày không hợp lệ. Sử dụng YYYY-MM-DD'
+                }), 400
+        else:
+            # Lấy ngày phân tích mới nhất nếu không có date parameter
+            latest_date = session.query(DailySalesSummary.analysis_date).order_by(
+                desc(DailySalesSummary.analysis_date)
+            ).first()
+            
+            if not latest_date:
+                return jsonify({
+                    'success': False,
+                    'message': 'Không có dữ liệu phân tích'
+                }), 404
+            
+            target_date = latest_date[0]
+        
+        # Danh sách các data ranges
+        data_ranges = [
+            '1_day_ago', '7_days_ago', '1_month_ago', 
+            '3_months_ago', '6_months_ago', '1_year_ago', 'all_time'
+        ]
+        
+        # Khởi tạo response structure
+        summary_data = {
+            'success': True,
+            'analysis_date': target_date.isoformat(),
+            'data': {}
+        }
+        
+        # Tổng hợp data cho từng data range
+        for data_range in data_ranges:
+            summary_data['data'][data_range] = {
+                'daily_sales': {},
+                'top_selling_items': {
+                    'revenue': [],
+                    'profit': [],
+                    'quantity': []
+                },
+                'category_summary': {
+                    'revenue': [],
+                    'quantity': []
+                },
+                'brand_summary': {
+                    'revenue': [],
+                    'quantity': []
+                },
+                'refund_analysis': {
+                    'refund_count': [],
+                    'refund_rate': [],
+                    'refund_quantity': [],
+                    'refund_reason': []
+                },
+                'slow_moving_items': {
+                    'no_sales': [],
+                    'low_sales': [],
+                    'high_stock_low_sales': [],
+                    'aging_stock': []
+                }
+            }
+            
+            # 1. Daily Sales Summary
+            daily_sales = session.query(DailySalesSummary).filter(
+                DailySalesSummary.analysis_date == target_date
+            ).first()
+            
+            if daily_sales:
+                summary_data['data'][data_range]['daily_sales'] = {
+                    'total_orders': daily_sales.total_orders,
+                    'total_revenue': float(daily_sales.total_revenue),
+                    'total_profit': float(daily_sales.total_profit),
+                    'total_refunds': daily_sales.total_refunds
+                }
+            
+            # 2. Top Selling Items
+            for sort_type in ['revenue', 'profit', 'quantity']:
+                top_items = session.query(TopSellingItem).filter(
+                    and_(
+                        TopSellingItem.analysis_date == target_date,
+                        TopSellingItem.data_range == data_range,
+                        TopSellingItem.sort_type == sort_type
+                    )
+                ).order_by(TopSellingItem.rank_position).limit(10).all()
+                
+                summary_data['data'][data_range]['top_selling_items'][sort_type] = [
+                    {
+                        'sku': item.sku,
+                        'item_name': item.item_name,
+                        'total_quantity_sold': item.total_quantity_sold,
+                        'total_revenue': float(item.total_revenue),
+                        'total_profit': float(item.total_profit),
+                        'rank_position': item.rank_position
+                    } for item in top_items
+                ]
+            
+            # 3. Category Summary
+            for sort_type in ['revenue', 'quantity']:
+                categories = session.query(CategorySummary).filter(
+                    and_(
+                        CategorySummary.analysis_date == target_date,
+                        CategorySummary.data_range == data_range,
+                        CategorySummary.sort_type == sort_type
+                    )
+                ).order_by(CategorySummary.rank_position).limit(10).all()
+                
+                summary_data['data'][data_range]['category_summary'][sort_type] = [
+                    {
+                        'category_id': cat.category_id,
+                        'category_name': cat.category_name,
+                        'total_quantity_sold': cat.total_quantity_sold,
+                        'total_revenue': float(cat.total_revenue),
+                        'total_profit': float(cat.total_profit),
+                        'profit_margin': float(cat.profit_margin),
+                        'rank_position': cat.rank_position
+                    } for cat in categories
+                ]
+            
+            # 4. Brand Summary
+            for sort_type in ['revenue', 'quantity']:
+                brands = session.query(BrandSummary).filter(
+                    and_(
+                        BrandSummary.analysis_date == target_date,
+                        BrandSummary.data_range == data_range,
+                        BrandSummary.sort_type == sort_type
+                    )
+                ).order_by(BrandSummary.rank_position).limit(10).all()
+                
+                summary_data['data'][data_range]['brand_summary'][sort_type] = [
+                    {
+                        'brand_id': brand.brand_id,
+                        'brand_name': brand.brand_name,
+                        'total_quantity_sold': brand.total_quantity_sold,
+                        'total_revenue': float(brand.total_revenue),
+                        'total_profit': float(brand.total_profit),
+                        'profit_margin': float(brand.profit_margin),
+                        'rank_position': brand.rank_position
+                    } for brand in brands
+                ]
+            
+            # 5. Refund Analysis
+            for sort_type in ['refund_count', 'refund_rate', 'refund_quantity', 'refund_reason']:
+                refunds = session.query(RefundAnalysis).filter(
+                    and_(
+                        RefundAnalysis.analysis_date == target_date,
+                        RefundAnalysis.data_range == data_range,
+                        RefundAnalysis.sort_type == sort_type
+                    )
+                ).order_by(RefundAnalysis.rank_position).limit(10).all()
+                
+                summary_data['data'][data_range]['refund_analysis'][sort_type] = [
+                    {
+                        'sku': refund.sku,
+                        'item_name': refund.item_name,
+                        'total_orders': refund.total_orders,
+                        'refund_orders': refund.refund_orders,
+                        'refund_rate': float(refund.refund_rate),
+                        'refund_reason': refund.refund_reason,
+                        'refund_quantity': refund.refund_quantity,
+                        'items_affected': refund.items_affected,
+                        'rank_position': refund.rank_position
+                    } for refund in refunds
+                ]
+            
+            # 6. Slow Moving Items
+            for sort_type in ['no_sales', 'low_sales', 'high_stock_low_sales', 'aging_stock']:
+                slow_items = session.query(SlowMovingItem).filter(
+                    and_(
+                        SlowMovingItem.analysis_date == target_date,
+                        SlowMovingItem.sort_type == sort_type
+                    )
+                ).order_by(SlowMovingItem.rank_position).limit(20).all()
+                
+                summary_data['data'][data_range]['slow_moving_items'][sort_type] = [
+                    {
+                        'sku': item.sku,
+                        'item_name': item.item_name,
+                        'brand_name': item.brand_name,
+                        'category_name': item.category_name,
+                        'current_stock': item.current_stock,
+                        'total_quantity_sold': item.total_quantity_sold,
+                        'avg_daily_sales': float(item.avg_daily_sales),
+                        'days_without_sales': item.days_without_sales,
+                        'stock_value': float(item.stock_value),
+                        'potential_loss': float(item.potential_loss),
+                        'rank_position': item.rank_position
+                    } for item in slow_items
+                ]
+        
+        session.close()
+        return jsonify(summary_data)
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi lấy comprehensive summary: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Lỗi server: {str(e)}'
+        }), 500
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -832,6 +1119,11 @@ if __name__ == '__main__':
     print("   - GET /api/refund-analysis")
     print("   - GET /api/low-stock-alerts")
     print("   - GET /api/batch-analysis")
-    print("\n�� Server đang chạy tại: http://localhost:5000")
+    print("   - GET /api/slow-moving-items")
+    print("   - GET /api/summary/overview")
+    print("   - GET /api/summary/all")
+    print("   - GET /api/summary/periods")
+    print("   - GET /api/summary/dates")
+    print("\n Server đang chạy tại: http://localhost:5000")
     
     app.run(host='0.0.0.0', port=5000, debug=True)

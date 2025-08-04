@@ -542,6 +542,57 @@
 			"response": []
 		},
 		{
+			"name": "Comprehensive Summary All",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/summary/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"summary",
+						"all"
+					]
+				},
+				"description": "Lấy tổng hợp tất cả data theo từng data range (ngày mới nhất)"
+			},
+			"response": []
+		},
+		{
+			"name": "Comprehensive Summary All with Date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/summary/all?date=2024-06-30",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"summary",
+						"all"
+					],
+					"query": [
+						{
+							"key": "date",
+							"value": "2024-06-30",
+							"description": "Ngày phân tích cụ thể"
+						}
+					]
+				},
+				"description": "Lấy tổng hợp tất cả data theo từng data range với ngày cụ thể"
+			},
+			"response": []
+		},
+		{
 			"name": "Available Periods",
 			"request": {
 				"method": "GET",
@@ -933,6 +984,253 @@
 				}
 			],
 			"description": "Test với date parameter"
+		},
+		{
+			"name": "Slow Moving Items",
+			"item": [
+				{
+					"name": "Get No Sales Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=no_sales&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "no_sales",
+									"description": "Hàng không bán được"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Lấy danh sách hàng không bán được"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Low Sales Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=low_sales&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "low_sales",
+									"description": "Hàng bán ít"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Lấy danh sách hàng bán ít"
+					},
+					"response": []
+				},
+				{
+					"name": "Get High Stock Low Sales Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=high_stock_low_sales&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "high_stock_low_sales",
+									"description": "Hàng tồn kho cao nhưng bán ít"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Lấy danh sách hàng tồn kho cao nhưng bán ít"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Aging Stock Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=aging_stock&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "aging_stock",
+									"description": "Hàng tồn kho lâu"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Lấy danh sách hàng tồn kho lâu"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Slow Moving Items by Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=no_sales&date=2024-06-30&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "no_sales",
+									"description": "Hàng không bán được"
+								},
+								{
+									"key": "date",
+									"value": "2024-06-30",
+									"description": "Ngày phân tích cụ thể"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Lấy dữ liệu hàng bán ế theo ngày cụ thể"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Slow Moving Items - Invalid Sort Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=invalid&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "invalid",
+									"description": "Loại phân tích không hợp lệ"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Test với sort_type không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Slow Moving Items - Invalid Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/slow-moving-items?sort_type=no_sales&date=2024-13-01&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"slow-moving-items"
+							],
+							"query": [
+								{
+									"key": "sort_type",
+									"value": "no_sales",
+									"description": "Hàng không bán được"
+								},
+								{
+									"key": "date",
+									"value": "2024-13-01",
+									"description": "Ngày không hợp lệ"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Số lượng kết quả"
+								}
+							]
+						},
+						"description": "Test với ngày không hợp lệ"
+					},
+					"response": []
+				}
+			],
+			"description": "API endpoints cho phân tích hàng bán ế (Slow Moving Items)"
 		},
 		{
 			"name": "Error Cases",
