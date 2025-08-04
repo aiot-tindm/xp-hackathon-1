@@ -64,6 +64,15 @@ export const navData: NavSectionProps['data'] = [
     ],
   },
   /**
+   * Customer Analytics
+   */
+  {
+    subheader: 'Customer Analytics',
+    items: [
+      { title: 'Customer Analytics', path: '/dashboard/customer-analytics', icon: ICONS.user },
+    ],
+  },
+  /**
    * Management
    */
   {

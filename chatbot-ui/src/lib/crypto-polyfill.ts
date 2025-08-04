@@ -1,15 +1,19 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-namespace */
-// Crypto polyfill for Node.js environment
-// This ensures the Web Crypto API is available in both browser and Node.js environments
+// Crypto polyfill for Node.js and browser environments
+// This ensures the Web Crypto API is available in both environments
 
 declare global {
   namespace globalThis {
     var crypto: Crypto;
   }
+  interface Window {
+    crypto: Crypto;
+  }
 }
 
-if (typeof globalThis.crypto === 'undefined') {
+// Ensure crypto is available globally
+if (typeof globalThis !== 'undefined' && typeof globalThis.crypto === 'undefined') {
   if (typeof window === 'undefined') {
     // Node.js environment
     try {
@@ -19,7 +23,15 @@ if (typeof globalThis.crypto === 'undefined') {
     } catch (error) {
       console.warn('WebCrypto API is not available in this Node.js version');
     }
+  } else if (typeof window !== 'undefined' && typeof window.crypto !== 'undefined') {
+    // Browser environment - ensure crypto is available on globalThis
+    globalThis.crypto = window.crypto;
   }
+}
+
+// Additional polyfill for browser environments that might not have crypto properly set up
+if (typeof window !== 'undefined' && typeof window.crypto !== 'undefined' && !globalThis.crypto) {
+  globalThis.crypto = window.crypto;
 }
 
 export {};

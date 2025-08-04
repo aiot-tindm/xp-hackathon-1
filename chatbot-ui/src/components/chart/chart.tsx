@@ -1,3 +1,5 @@
+'use client';
+
 import { lazy, Suspense, forwardRef } from 'react';
 import { useIsClient } from 'minimal-shared/hooks';
 import { mergeClasses } from 'minimal-shared/utils';

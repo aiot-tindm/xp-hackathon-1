@@ -1,8 +1,9 @@
+'use client';
+
 import type { Theme, CSSObject } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 
 import { varAlpha } from 'minimal-shared/utils';
-
-import { styled } from '@mui/material/styles';
 
 import type { PopoverArrow } from './types';
 

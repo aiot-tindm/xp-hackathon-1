@@ -333,8 +333,10 @@ export function FloatingChatWidget() {
               {[
                 'Top products?',
                 'Sales trends?',
+                'Customer segments?',
+                'Churn risks?',
+                'Whale customers?',
                 'Revenue Q2?',
-                'Refund rates?',
               ].map((question) => (
                 <Button
                   key={question}

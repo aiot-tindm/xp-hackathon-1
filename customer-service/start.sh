@@ -15,7 +15,7 @@ echo "✅ Required services are running"
 
 # Start Backend API in development mode
 echo "📦 Starting Backend API (Development Mode)..."
-cd backend
+cd api-server
 npm run dev &
 BACKEND_PID=$!
 cd ..
@@ -51,7 +51,7 @@ echo "🔧 Useful commands:"
 echo "  - View logs: docker-compose logs -f"
 echo "  - Stop services: docker-compose down"
 echo "  - Restart services: docker-compose restart"
-echo "  - Database migration: cd backend && npx prisma migrate dev"
+echo "  - Database migration: cd api-server && npx prisma migrate dev"
 echo ""
 echo "🛑 To stop development servers, press Ctrl+C"
 

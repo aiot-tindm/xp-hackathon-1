@@ -293,7 +293,10 @@ export function AnalyticsChatView() {
               'Which products have high refund rates?',
               'What are the main refund reasons?',
               'Show me slow-moving inventory',
-              'Analyze sales by category',
+              'Analyze customer segments and CLV',
+              'Which customers are at churn risk?',
+              'Show me whale customers performance',
+              'What are my customer retention strategies?',
               'Compare brand performance',
             ].map((question) => (
               <Box
