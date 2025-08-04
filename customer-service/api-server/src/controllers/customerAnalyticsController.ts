@@ -1293,7 +1293,7 @@ export const getPotentialCustomersForProducts = async (req: Request, res: Respon
 
     // Group orders by customer
     const customerOrders = new Map<number, Order[]>();
-    similarProductCustomers.forEach((order: Order) => {
+    similarProductCustomers.forEach((order: any) => {
       const customerId = order.customerId;
       if (!customerOrders.has(customerId)) {
         customerOrders.set(customerId, []);
@@ -1457,7 +1457,7 @@ export const getNewInventoryCustomerMatching = async (req: Request, res: Respons
       });
 
       // Analyze customer interest in this new item
-      const interestedCustomers = similarCustomers.map((order: Order) => {
+      const interestedCustomers = similarCustomers.map((order: any) => {
         const totalSpent = order.orderItems.reduce((sum: number, item: OrderItem) => sum + (Number(item.pricePerUnit) * item.quantity), 0);
         const similarItems = order.orderItems.filter((item: OrderItem) => 
           item.item.categoryId === newItem.categoryId || item.item.brandId === newItem.brandId
@@ -1508,7 +1508,7 @@ export const getNewInventoryCustomerMatching = async (req: Request, res: Respons
     res.json({
       success: true,
       data: {
-        newItems: newItems.map((item: Item) => ({
+        newItems: newItems.map((item: any) => ({
           sku: item.sku,
           name: item.name,
           category: item.category?.name,
