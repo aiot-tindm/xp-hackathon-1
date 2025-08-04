@@ -5,9 +5,9 @@ import { JwtSignInView } from 'src/auth/view/jwt';
 // ----------------------------------------------------------------------
 
 export const metadata: Metadata = {
-  title: 'Minimals UI: The starting point for your next project',
+  title: 'Xp Team - Hackathon 2025',
   description:
-    'The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style',
+    'Xp Team - Hackathon 2025',
 };
 
 export default function Page() {

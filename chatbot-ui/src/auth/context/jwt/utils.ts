@@ -32,21 +32,8 @@ export function isValidToken(accessToken: string) {
   if (!accessToken) {
     return false;
   }
+  return true;
 
-  try {
-    const decoded = jwtDecode(accessToken);
-
-    if (!decoded || !('exp' in decoded)) {
-      return false;
-    }
-
-    const currentTime = Date.now() / 1000;
-
-    return decoded.exp > currentTime;
-  } catch (error) {
-    console.error('Error during token validation:', error);
-    return false;
-  }
 }
 
 // ----------------------------------------------------------------------
@@ -76,13 +63,6 @@ export async function setSession(accessToken: string | null) {
 
       axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
-      const decodedToken = jwtDecode(accessToken); // ~3 days by minimals server
-
-      if (decodedToken && 'exp' in decodedToken) {
-        tokenExpired(decodedToken.exp);
-      } else {
-        throw new Error('Invalid access token!');
-      }
     } else {
       sessionStorage.removeItem(JWT_STORAGE_KEY);
       delete axios.defaults.headers.common.Authorization;

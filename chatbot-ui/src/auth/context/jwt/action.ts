@@ -26,14 +26,9 @@ export type SignUpParams = {
  *************************************** */
 export const signInWithPassword = async ({ email, password }: SignInParams): Promise<void> => {
   try {
-    // const params = { email, password };
 
     const user = _users.find((_user) => _user.email === email);
-    // const res = await axios.post(endpoints.auth.signIn, params);
-    const accessToken = await sign({ userId: user?.id }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
-    // const { accessToken } = res.data;
+    const accessToken = 'abc'
 
     if (!accessToken) {
       throw new Error('Access token not found in response');
