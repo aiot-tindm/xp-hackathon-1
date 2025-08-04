@@ -197,7 +197,6 @@ class AnalyticsDataEngine:
         # Lấy dữ liệu đơn hàng hợp lệ (không refund)
         valid_orders = [order for order in filtered_orders if order.status != 'refunded']
         
-        print(f"DEBUG: Found {len(valid_orders)} valid orders")
         total_orders = len(valid_orders)
         total_revenue = 0
         
@@ -597,7 +596,7 @@ class AnalyticsDataEngine:
         return results
 
     def analyze_slow_moving_items(self, limit: int = 10, sort_type: str = 'no_sales') -> List[Dict]:
-        """Phân tích hàng bán ế"""
+        """Phân tích hàng bán ế theo logic SQL query"""
         self.logger.info(f"Phân tích hàng bán ế theo {sort_type} (top {limit})...")
         
         # Lấy tất cả dữ liệu bán hàng hợp lệ (không refund)
@@ -607,35 +606,49 @@ class AnalyticsDataEngine:
                 for order_item in order.order_items:
                     valid_order_items.append(order_item)
         
-        # Tìm ngày đơn hàng đầu tiên để tính total_days chính xác
-        first_order_date = min(order.order_date for order in self.orders) if self.orders else self.today
-        total_days = (self.today - first_order_date).days if total_days > 0 else 365
-        
-        # Phân tích từng item
+        # Phân tích từng item theo logic SQL query
         slow_moving_analysis = {}
         
         for item in self.items:
-            if item.stock_quantity <= 0:
-                continue  # Bỏ qua items hết hàng
+            if not item.is_active:
+                continue  # Bỏ qua items không active
                 
             # Tính tổng số lượng bán trong toàn bộ thời gian
             total_sold = sum(oi.quantity for oi in valid_order_items if oi.item_id == item.id)
             
-            # Tính trung bình bán hàng ngày (dựa trên thời gian thực tế)
-            avg_daily_sales = total_sold / total_days if total_days > 0 else 0
+            # Tính tổng doanh thu
+            total_revenue = sum(oi.quantity * float(oi.price_per_unit) for oi in valid_order_items if oi.item_id == item.id)
             
-            # Tính số ngày không bán được hàng
-            days_without_sales = total_days - (total_sold if total_sold > 0 else 0)
+            # Tính tổng lợi nhuận
+            total_profit = sum(oi.quantity * (float(oi.price_per_unit) - float(item.cost_price)) for oi in valid_order_items if oi.item_id == item.id)
+            
+            # Tính tỷ lệ tồn kho / bán hàng (stock_to_sales_ratio)
+            if total_sold > 0:
+                stock_to_sales_ratio = item.stock_quantity / total_sold
+            else:
+                stock_to_sales_ratio = 999999  # Nếu chưa bán được gì
             
             # Tính giá trị tồn kho
             stock_value = float(item.cost_price) * item.stock_quantity
             
-            # Tính tiềm năng mất mát (nếu không bán được)
+            # Tính tiềm năng mất mát
             potential_loss = stock_value if total_sold == 0 else stock_value * 0.5
             
             # Lấy thông tin brand và category
             brand_name = next((b.name for b in self.brands if b.id == item.brand_id), 'Unknown')
             category_name = next((c.name for c in self.categories if c.id == item.category_id), 'Unknown')
+            
+            # Tính profit margin
+            profit_margin = (total_profit / total_revenue * 100) if total_revenue > 0 else 0
+            
+            # Tính thời gian tồn kho dựa trên batches
+            item_batches = [batch for batch in self.batches if batch.sku == item.sku]
+            if item_batches:
+                # Lấy ngày nhập lô hàng cũ nhất còn tồn kho
+                oldest_batch_date = min(batch.import_date for batch in item_batches if batch.remain_quantity > 0)
+                days_in_stock = (self.today - oldest_batch_date).days
+            else:
+                days_in_stock = 0
             
             slow_moving_analysis[item.id] = {
                 'sku': item.sku,
@@ -644,44 +657,47 @@ class AnalyticsDataEngine:
                 'category_name': category_name,
                 'current_stock': item.stock_quantity,
                 'total_quantity_sold': total_sold,
-                'avg_daily_sales': avg_daily_sales,
-                'days_without_sales': days_without_sales,
+                'total_revenue': total_revenue,
+                'total_profit': total_profit,
+                'profit_margin': profit_margin,
+                'stock_to_sales_ratio': stock_to_sales_ratio,
                 'stock_value': stock_value,
-                'potential_loss': potential_loss
+                'potential_loss': potential_loss,
+                'cost_price': float(item.cost_price),
+                'sale_price': float(item.sale_price),
+                'days_in_stock': days_in_stock
             }
         
-        # Lọc và sắp xếp theo loại được chọn
+        # Lọc và sắp xếp theo logic SQL query
         results = []
         
         if sort_type == 'no_sales':
-            # Hàng không bán được trong toàn bộ thời gian
+            # Hàng không bán được (total_quantity_sold = 0)
             no_sales_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
                              if data['total_quantity_sold'] == 0}
             sorted_items = sorted(no_sales_items.items(), 
                                 key=lambda x: x[1]['stock_value'], reverse=True)[:limit]
             
         elif sort_type == 'low_sales':
-            # Hàng bán ít (dưới 5% tồn kho)
+            # Hàng bán ít (stock_to_sales_ratio > 5 hoặc total_quantity_sold thấp)
             low_sales_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
-                              if data['total_quantity_sold'] > 0 and 
-                              data['total_quantity_sold'] < data['current_stock'] * 0.05}
+                              if data['stock_to_sales_ratio'] > 5 or data['total_quantity_sold'] < 10}
             sorted_items = sorted(low_sales_items.items(), 
-                                key=lambda x: x[1]['potential_loss'], reverse=True)[:limit]
+                                key=lambda x: (x[1]['stock_to_sales_ratio'], -x[1]['total_quantity_sold']), reverse=True)[:limit]
             
         elif sort_type == 'high_stock_low_sales':
-            # Hàng có tồn kho cao nhưng bán ít
+            # Hàng có tồn kho cao nhưng bán ít (stock_to_sales_ratio > 10)
             high_stock_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
-                               if data['current_stock'] > 10 and 
-                               data['avg_daily_sales'] < 1}
+                               if data['stock_to_sales_ratio'] > 10 and data['current_stock'] > 20}
             sorted_items = sorted(high_stock_items.items(), 
-                                key=lambda x: x[1]['stock_value'], reverse=True)[:limit]
+                                key=lambda x: x[1]['stock_to_sales_ratio'], reverse=True)[:limit]
             
         elif sort_type == 'aging_stock':
-            # Hàng tồn kho lâu (không bán được trong 30+ ngày)
+            # Hàng tồn kho lâu (dựa trên ngày nhập lô hàng cũ nhất)
             aging_items = {item_id: data for item_id, data in slow_moving_analysis.items() 
-                          if data['days_without_sales'] >= 30}
+                          if data['days_in_stock'] > 30}  # Tồn kho hơn 30 ngày
             sorted_items = sorted(aging_items.items(), 
-                                key=lambda x: x[1]['days_without_sales'], reverse=True)[:limit]
+                                key=lambda x: x[1]['days_in_stock'], reverse=True)[:limit]
             
         else:
             raise ValueError(f"Sort type không hợp lệ: {sort_type}. Chỉ hỗ trợ: no_sales, low_sales, high_stock_low_sales, aging_stock")
@@ -697,10 +713,15 @@ class AnalyticsDataEngine:
                 'category_name': data['category_name'],
                 'current_stock': data['current_stock'],
                 'total_quantity_sold': data['total_quantity_sold'],
-                'avg_daily_sales': data['avg_daily_sales'],
-                'days_without_sales': data['days_without_sales'],
+                'total_revenue': data['total_revenue'],
+                'total_profit': data['total_profit'],
+                'profit_margin': data['profit_margin'],
+                'stock_to_sales_ratio': data['stock_to_sales_ratio'],
                 'stock_value': data['stock_value'],
                 'potential_loss': data['potential_loss'],
+                'cost_price': data['cost_price'],
+                'sale_price': data['sale_price'],
+                'days_in_stock': data['days_in_stock'],
                 'rank': rank
             })
         
@@ -1060,10 +1081,15 @@ class AnalyticsDataEngine:
                     category_name=item_data.get('category_name', ''),
                     current_stock=item_data['current_stock'],
                     total_quantity_sold=item_data['total_quantity_sold'],
-                    avg_daily_sales=Decimal(str(item_data['avg_daily_sales'])),
-                    days_without_sales=item_data['days_without_sales'],
+                    total_revenue=Decimal(str(item_data['total_revenue'])),
+                    total_profit=Decimal(str(item_data['total_profit'])),
+                    profit_margin=Decimal(str(item_data['profit_margin'])),
+                    stock_to_sales_ratio=Decimal(str(item_data['stock_to_sales_ratio'])),
                     stock_value=Decimal(str(item_data['stock_value'])),
                     potential_loss=Decimal(str(item_data['potential_loss'])),
+                    cost_price=Decimal(str(item_data['cost_price'])),
+                    sale_price=Decimal(str(item_data['sale_price'])),
+                    days_in_stock=item_data.get('days_in_stock', 0),
                     rank_position=item_data['rank']
                 )
                 session.add(summary)

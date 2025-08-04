@@ -690,10 +690,15 @@ def get_slow_moving_items():
                 'category_name': item.category_name,
                 'current_stock': item.current_stock,
                 'total_quantity_sold': item.total_quantity_sold,
-                'avg_daily_sales': float(item.avg_daily_sales),
-                'days_without_sales': item.days_without_sales,
+                'total_revenue': float(item.total_revenue),
+                'total_profit': float(item.total_profit),
+                'profit_margin': float(item.profit_margin),
+                'stock_to_sales_ratio': float(item.stock_to_sales_ratio),
                 'stock_value': float(item.stock_value),
                 'potential_loss': float(item.potential_loss),
+                'cost_price': float(item.cost_price),
+                'sale_price': float(item.sale_price),
+                'days_in_stock': item.days_in_stock,
                 'rank_position': item.rank_position,
                 'created_at': item.created_at.isoformat() if item.created_at else None
             })
@@ -1075,10 +1080,15 @@ def get_comprehensive_summary():
                         'category_name': item.category_name,
                         'current_stock': item.current_stock,
                         'total_quantity_sold': item.total_quantity_sold,
-                        'avg_daily_sales': float(item.avg_daily_sales),
-                        'days_without_sales': item.days_without_sales,
+                        'total_revenue': float(item.total_revenue),
+                        'total_profit': float(item.total_profit),
+                        'profit_margin': float(item.profit_margin),
+                        'stock_to_sales_ratio': float(item.stock_to_sales_ratio),
                         'stock_value': float(item.stock_value),
                         'potential_loss': float(item.potential_loss),
+                        'cost_price': float(item.cost_price),
+                        'sale_price': float(item.sale_price),
+                        'days_in_stock': item.days_in_stock,
                         'rank_position': item.rank_position
                     } for item in slow_items
                 ]
