@@ -81,7 +81,7 @@ export async function sendAnalyticsQuery(query: string, abortController?: AbortC
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 60000, // 60 second timeout for AI processing
+        timeout: 240000, // 60 second timeout for AI processing
         signal: abortController?.signal,
       }
     );
