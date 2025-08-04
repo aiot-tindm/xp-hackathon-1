@@ -40,7 +40,7 @@ export async function exportDataToPdf(request: ExportRequest): Promise<void> {
   try {
     const exportUrl = CONFIG.api.exportPdfBaseUrl
       ? CONFIG.api.exportPdfBaseUrl + '/api/export/direct'
-      : '/api/export/direct';
+      : '/export-pdf/api/export/direct';
     const response = await axios.post(exportUrl, request, {
       headers: {
         'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export async function sendAnalyticsQuery(
   try {
     const chatUrl = CONFIG.api.chatbotBaseUrl
       ? CONFIG.api.chatbotBaseUrl + '/api/chat'
-      : '/api/chat';
+      : '/chatbot//api/chat';
     const response = await axios.post<AnalyticsResponse>(
       chatUrl,
       { message: query },

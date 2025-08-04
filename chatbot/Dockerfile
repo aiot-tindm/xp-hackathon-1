@@ -9,6 +9,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci --only=production
 
+ENV PORT=3001
 # Copy source code
 COPY . .
 
@@ -21,7 +22,7 @@ RUN chown -R chatbot:nodejs /app
 USER chatbot
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

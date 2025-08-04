@@ -2,7 +2,7 @@ import { toast } from 'src/components/snackbar';
 
 export async function exportToPDF(type: string = 'all'): Promise<void> {
   try {
-    const response = await fetch('http://localhost:3000/api/export/direct', {
+    const response = await fetch('/export-pdf/api/export/direct', {
       method: 'POST',
       headers: {
         'accept': 'application/pdf',
