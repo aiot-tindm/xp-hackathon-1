@@ -207,7 +207,6 @@ CREATE TABLE low_stock_alerts (
 
 CREATE TABLE `slow_moving_items` (
     `analysis_date` DATE NOT NULL COMMENT 'Ngày thực hiện phân tích (YYYY-MM-DD)',
-    `data_range` ENUM('1_day_ago', '7_days_ago', '1_month_ago', '3_months_ago', '6_months_ago', '1_year_ago', 'all_time') NOT NULL COMMENT 'Khoảng thời gian phân tích',
     `sort_type` ENUM('no_sales', 'low_sales', 'high_stock_low_sales', 'aging_stock') NOT NULL COMMENT 'Loại phân tích hàng bán ế',
     `sku` VARCHAR(100) NOT NULL COMMENT 'Mã SKU của sản phẩm (Stock Keeping Unit)',
     `item_name` VARCHAR(200) NOT NULL COMMENT 'Tên sản phẩm',
@@ -215,14 +214,19 @@ CREATE TABLE `slow_moving_items` (
     `category_name` VARCHAR(200) NULL COMMENT 'Tên danh mục sản phẩm',
     `current_stock` INT DEFAULT 0 COMMENT 'Số lượng tồn kho hiện tại',
     `total_quantity_sold` INT DEFAULT 0 COMMENT 'Tổng số lượng đã bán trong khoảng thời gian phân tích',
-    `avg_daily_sales` DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Trung bình số lượng bán hàng ngày',
-    `days_without_sales` INT DEFAULT 0 COMMENT 'Số ngày không có bán hàng',
+    `total_revenue` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Tổng doanh thu từ sản phẩm',
+    `total_profit` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Tổng lợi nhuận từ sản phẩm',
+    `profit_margin` DECIMAL(5,2) DEFAULT 0.00 COMMENT 'Tỷ lệ lợi nhuận (%)',
+    `stock_to_sales_ratio` DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Tỷ lệ tồn kho / bán hàng',
     `stock_value` DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Giá trị tồn kho (cost_price * current_stock)',
     `potential_loss` DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Tiềm năng mất mát nếu không bán được hàng',
+    `cost_price` DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Giá vốn sản phẩm',
+    `sale_price` DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Giá bán sản phẩm',
+    `days_in_stock` INT DEFAULT 0 COMMENT 'Số ngày tồn kho (tính từ lô hàng cũ nhất)',
     `rank_position` INT DEFAULT 0 COMMENT 'Vị trí xếp hạng trong danh sách',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời gian tạo bản ghi',
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Thời gian cập nhật bản ghi',
-    PRIMARY KEY (`analysis_date`, `data_range`, `sort_type`, `sku`)
+    PRIMARY KEY (`analysis_date`, `sort_type`, `sku`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bảng lưu trữ phân tích hàng bán ế';
 
 DROP TABLE IF EXISTS `batches`;
@@ -527,3 +531,45 @@ INSERT INTO system_config (config_type, business_type, config, is_active, create
   NOW(),
   NOW()
 );
+
+CREATE TABLE `revenue_predictions` (
+    `analysis_date` DATE NOT NULL COMMENT 'Ngày thực hiện phân tích (YYYY-MM-DD)',
+    `prediction_period` VARCHAR(50) NOT NULL COMMENT 'Khoảng thời gian dự đoán (next_month, next_quarter, etc.)',
+    `prediction_days` INT DEFAULT 30 COMMENT 'Số ngày dự đoán',
+
+    -- Historical data
+    `total_historical_revenue` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Tổng doanh thu lịch sử',
+    `avg_daily_revenue` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Trung bình doanh thu hàng ngày',
+    `std_daily_revenue` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Độ lệch chuẩn doanh thu hàng ngày',
+    `data_days` INT DEFAULT 0 COMMENT 'Số ngày có dữ liệu',
+    `trend_percentage` DECIMAL(5,2) DEFAULT 0.00 COMMENT 'Tỷ lệ tăng trưởng (%)',
+    `r2_score` DECIMAL(5,4) DEFAULT 0.0000 COMMENT 'Độ chính xác của model (R-squared)',
+    `mape` DECIMAL(5,2) DEFAULT 0.00 COMMENT 'Mean Absolute Percentage Error',
+
+    -- Predictions
+    `total_predicted_revenue` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Tổng doanh thu dự đoán',
+    `avg_daily_prediction` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Trung bình doanh thu dự đoán hàng ngày',
+    `confidence_interval` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Khoảng tin cậy',
+    `lower_bound` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Giới hạn dưới',
+    `upper_bound` DECIMAL(15,2) DEFAULT 0.00 COMMENT 'Giới hạn trên',
+
+    -- Model info
+    `algorithm` VARCHAR(100) DEFAULT 'Linear Regression' COMMENT 'Thuật toán sử dụng',
+    `features_used` TEXT COMMENT 'Danh sách features sử dụng (JSON)',
+    `data_points` INT DEFAULT 0 COMMENT 'Số điểm dữ liệu',
+    `confidence_level` DECIMAL(5,2) DEFAULT 0.00 COMMENT 'Mức độ tin cậy (%)',
+
+    -- Risk assessment
+    `high_volatility` BOOLEAN DEFAULT FALSE COMMENT 'Độ biến động cao',
+    `negative_trend` BOOLEAN DEFAULT FALSE COMMENT 'Xu hướng giảm',
+    `low_confidence` BOOLEAN DEFAULT FALSE COMMENT 'Độ tin cậy thấp',
+    `insufficient_data` BOOLEAN DEFAULT FALSE COMMENT 'Dữ liệu không đủ',
+
+    -- JSON data
+    `daily_predictions` TEXT COMMENT 'Dự đoán từng ngày (JSON)',
+    `weekday_analysis` TEXT COMMENT 'Phân tích theo ngày trong tuần (JSON)',
+
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời gian tạo bản ghi',
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Thời gian cập nhật bản ghi',
+    PRIMARY KEY (`analysis_date`, `prediction_period`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bảng lưu trữ dự đoán doanh thu';
