@@ -3,12 +3,17 @@ import type { ChartOptions } from 'src/components/chart';
 
 import { useState, useCallback } from 'react';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 
 import { fShortenNumber } from 'src/utils/format-number';
 
+import { Iconify } from 'src/components/iconify';
 import { Chart, useChart, ChartSelect, ChartLegends } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
@@ -43,11 +48,46 @@ export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: 
     ...chart.options,
   });
 
+  const currentSeries = chart.series.find((i) => i.name === selectedSeries);
+
   const handleChangeSeries = useCallback((newValue: string) => {
     setSelectedSeries(newValue);
   }, []);
 
-  const currentSeries = chart.series.find((i) => i.name === selectedSeries);
+  const handleExportData = useCallback(async () => {
+    try {
+      // Call API to export PDF
+      const response = await fetch('/api/export/yearly-sales', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          year: selectedSeries,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      // Get PDF blob from response
+      const pdfBlob = await response.blob();
+      
+      // Create download link
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `yearly-sales-${selectedSeries}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      // You can add toast notification here
+    }
+  }, [selectedSeries]);
 
   return (
     <Card sx={sx} {...other}>
@@ -55,11 +95,24 @@ export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: 
         title={title}
         subheader={subheader}
         action={
-          <ChartSelect
-            options={chart.series.map((item) => item.name)}
-            value={selectedSeries}
-            onChange={handleChangeSeries}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            
+            <Button
+              color="inherit"
+              variant="outlined"
+              startIcon={<Iconify icon="eva:download-fill" />}
+              onClick={handleExportData}
+            >
+              Export Data
+            </Button>
+            
+            
+            <ChartSelect
+              options={chart.series.map((item) => item.name)}
+              value={selectedSeries}
+              onChange={handleChangeSeries}
+            />
+          </Box>
         }
         sx={{ mb: 3 }}
       />
