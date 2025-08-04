@@ -95,6 +95,9 @@ services:
       context: ./customer-service/api-server
     env_file:
       - ./.env
+    depends_on:
+      inventory_sales_db:
+        condition: service_healthy
 
   chatbot-ui:
     build:
@@ -110,3 +113,4 @@ services:
       - analysis-inventory
       - export-pdf
       - chatbot-ui
+      - customer-service
