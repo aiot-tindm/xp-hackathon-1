@@ -71,7 +71,6 @@ class GeminiService {
                         - Use clear and concise bullet points or table format.
                         - Avoid flowery or poetic language. Keep the tone professional and data-focused.
                         - For forecasts, base the analysis only on trends visible in the provided data. Do not guess.
-                        - 📌 Always respond in English, regardless of the question language or dataset content.
  
                     `;
 
