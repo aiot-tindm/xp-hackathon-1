@@ -43,7 +43,9 @@ export const testConnection = async (): Promise<boolean> => {
     connection.release();
     return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    // Không throw error, chỉ log và return false
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.log(`⚠️  Database connection failed (optional): ${errorMessage}`);
     return false;
   }
 };
