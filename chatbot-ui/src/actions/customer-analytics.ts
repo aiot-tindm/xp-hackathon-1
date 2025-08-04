@@ -5,7 +5,13 @@ import { CONFIG } from 'src/global-config';
 // ----------------------------------------------------------------------
 
 export type CustomerSegment = 'whale' | 'vip' | 'regular' | 'new' | 'churn';
-export type BusinessType = 'default' | 'high_value' | 'small_business' | 'high_frequency' | 'electronics' | 'fashion_sports';
+export type BusinessType =
+  | 'default'
+  | 'high_value'
+  | 'small_business'
+  | 'high_frequency'
+  | 'electronics'
+  | 'fashion_sports';
 export type RiskLevel = 'high' | 'medium' | 'low';
 
 export interface CustomerAnalyticsOverview {
@@ -158,9 +164,7 @@ export interface NewInventoryMatching {
 
 // ----------------------------------------------------------------------
 
-const getCustomerAnalyticsBaseUrl = () => {
-  return CONFIG.api.customerServiceBaseUrl || 'http://localhost:4001';
-};
+const getCustomerAnalyticsBaseUrl = () => CONFIG.api.customerServiceBaseUrl || '/customer-service';
 
 export async function getCustomerAnalyticsOverview(params?: {
   page?: number;

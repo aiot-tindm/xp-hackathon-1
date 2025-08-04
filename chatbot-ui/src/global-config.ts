@@ -50,6 +50,6 @@ export const CONFIG: ConfigValue = {
   api: {
     chatbotBaseUrl: process.env.NEXT_PUBLIC_CHATBOT_BASE_URL ?? '',
     exportPdfBaseUrl: process.env.NEXT_PUBLIC_EXPORT_PDF_BASE_URL ?? '',
-    customerServiceBaseUrl: process.env.NEXT_PUBLIC_CUSTOMER_SERVICE_BASE_URL ?? 'http://localhost:4001',
+    customerServiceBaseUrl: process.env.NEXT_PUBLIC_CUSTOMER_SERVICE_BASE_URL ?? '/customer-service',
   },
 };
