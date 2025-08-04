@@ -175,7 +175,7 @@ async function getAnalytics() {
             return {};
         }
 
-        const res = await fetch(`${process.env.ENDPOINT_INVENTORY_SERVICE}/api/summary/all?date=2024-06-30`, {
+        const res = await fetch(`${process.env.ENDPOINT_INVENTORY_SERVICE}/api/summary/all`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

@@ -155,9 +155,15 @@ class GeminiService {
             await this.uploadFile(revenue.data, 'revenueAnalytics');
 
 
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Tháng tính từ 0
+            const yyyy = today.getFullYear();
+
+            const dateStr = `${dd}-${mm}-${yyyy}`; 
             const dataAnalytics = await getAnalytics();
             // console.log('inventory anlyze', JSON.stringify(dataAnalytics.data))
-            await this.uploadFile(dataAnalytics.data, 'inventoryAnalysis-30-6-2024');
+            await this.uploadFile(dataAnalytics.data, `inventoryAnalysis-${dateStr}`);
 
 
             console.log('📈 Data summary:', {
