@@ -980,8 +980,7 @@ class AnalyticsDataEngine:
     def run_all_analysis(self):
         """Chạy phân tích cho tất cả các khoảng thời gian"""
         self.logger.info("Bắt đầu chạy analysis cho tất cả các khoảng thời gian...")
-        print("\n🚀 BẮT ĐẦU PHÂN TÍCH DỮ LIỆU...")
-        print("\n🚀 NGÀY B...")
+        print("\n🚀 BẮT ĐẦU PHÂN TÍCH DỮ LIỆU CỦA NGÀY", self.analysis_date)
         print("="*60)
         
         # Phân tích doanh số

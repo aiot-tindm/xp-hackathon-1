@@ -35,31 +35,13 @@ RUN mkdir -p /app/logs
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-# Tạo script chạy analysis với retry logic
+# Tạo script chạy analysis
 RUN echo '#!/bin/bash\n\
 echo "🚀 Khởi động Analysis System..."\n\
 echo "📊 Chạy analysis.py..."\n\
-\n\
-# Retry logic cho MySQL connection\n\
-max_attempts=30\n\
-attempt=1\n\
-\n\
-while [ $attempt -le $max_attempts ]; do\n\
-    echo "   Thử kết nối MySQL lần $attempt/$max_attempts..."\n\
-    \n\
-    cd /app/cron-job\n\
-    if python analysis.py; then\n\
-        echo "✅ Hoàn thành phân tích!"\n\
-        exit 0\n\
-    else\n\
-        echo "   Lỗi kết nối MySQL, thử lại sau 2 giây..."\n\
-        sleep 2\n\
-        attempt=$((attempt + 1))\n\
-    fi\n\
-done\n\
-\n\
-echo "❌ Không thể kết nối MySQL sau $max_attempts lần thử!"\n\
-exit 1\n\
+cd /app/cron-job\n\
+python analysis.py\n\
+echo "✅ Hoàn thành phân tích!"\n\
 ' > /app/run_analysis.sh && chmod +x /app/run_analysis.sh
 
 # Tạo script để trigger analysis từ bên ngoài
