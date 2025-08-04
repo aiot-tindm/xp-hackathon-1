@@ -105,7 +105,7 @@ export function ChatMessageInput({
         value={message}
         onKeyUp={handleSendMessage}
         onChange={handleChangeMessage}
-        placeholder="Nhập tin nhắn..."
+        placeholder="Type a message"
         disabled={disabled}
         startAdornment={
           <IconButton>
