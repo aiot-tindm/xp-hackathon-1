@@ -102,6 +102,39 @@ services:
   chatbot-ui:
     build:
       context: ./chatbot-ui
+      dockerfile: Dockerfile
+    container_name: chatbot-ui
+    ports:
+      - "8082:8082"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_CHATBOT_BASE_URL=
+      - NEXT_PUBLIC_EXPORT_PDF_BASE_URL=
+    depends_on:
+      chatbot-backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  chatbot-backend:
+    build:
+      context: ./chatbot
+      dockerfile: Dockerfile
+    container_name: chatbot-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - chatbot-data:/app/data
 
   nginx:
     image: nginx:latest
@@ -113,4 +146,9 @@ services:
       - analysis-inventory
       - export-pdf
       - chatbot-ui
+      - chatbot-backend
       - customer-service
+
+volumes:
+  chatbot-data:
+    name: chatbot-data

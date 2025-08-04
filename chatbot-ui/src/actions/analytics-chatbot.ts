@@ -17,7 +17,15 @@ export type AnalyticsResponse = {
 // ----------------------------------------------------------------------
 
 export type ExportRequest = {
-  type: 'best_seller' | 'refund' | 'refund_reason' | 'revenue' | 'category' | 'brand' | 'slow_moving' | 'all';
+  type:
+    | 'best_seller'
+    | 'refund'
+    | 'refund_reason'
+    | 'revenue'
+    | 'category'
+    | 'brand'
+    | 'slow_moving'
+    | 'all';
   platform?: string;
   month?: string;
   year?: number;
@@ -30,18 +38,16 @@ export type ExportRequest = {
 
 export async function exportDataToPdf(request: ExportRequest): Promise<void> {
   try {
-    const exportUrl = CONFIG.api.exportPdfBaseUrl + '/api/export/direct';
-    const response = await axios.post(
-      exportUrl,
-      request,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        responseType: 'blob',
-        timeout: 120000, // 2 minute timeout for PDF processing
-      }
-    );
+    const exportUrl = CONFIG.api.exportPdfBaseUrl
+      ? CONFIG.api.exportPdfBaseUrl + '/api/export/direct'
+      : '/api/export/direct';
+    const response = await axios.post(exportUrl, request, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      responseType: 'blob',
+      timeout: 120000, // 2 minute timeout for PDF processing
+    });
 
     // Create blob URL for PDF download
     const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -61,7 +67,9 @@ export async function exportDataToPdf(request: ExportRequest): Promise<void> {
     console.error('Export PDF error:', error);
     if (axios.isAxiosError(error)) {
       if (error.code === 'ECONNREFUSED' || error.response?.status === 503) {
-        throw new Error('Export service is not available. Please ensure the export-pdf server is running.');
+        throw new Error(
+          'Export service is not available. Please ensure the export-pdf server is running.'
+        );
       }
       if (error.response?.data?.error) {
         throw new Error(error.response.data.error);
@@ -71,9 +79,14 @@ export async function exportDataToPdf(request: ExportRequest): Promise<void> {
   }
 }
 
-export async function sendAnalyticsQuery(query: string, abortController?: AbortController): Promise<string> {
+export async function sendAnalyticsQuery(
+  query: string,
+  abortController?: AbortController
+): Promise<string> {
   try {
-    const chatUrl = CONFIG.api.chatbotBaseUrl ? CONFIG.api.chatbotBaseUrl + '/api/chat' : '/api/chat';
+    const chatUrl = CONFIG.api.chatbotBaseUrl
+      ? CONFIG.api.chatbotBaseUrl + '/api/chat'
+      : '/api/chat';
     const response = await axios.post<AnalyticsResponse>(
       chatUrl,
       { message: query },
@@ -91,7 +104,9 @@ export async function sendAnalyticsQuery(query: string, abortController?: AbortC
     console.error('Analytics chatbot error:', error);
     if (axios.isAxiosError(error)) {
       if (error.code === 'ECONNREFUSED' || error.response?.status === 503) {
-        throw new Error('Analytics service is not available. Please ensure the chatbot server is running.');
+        throw new Error(
+          'Analytics service is not available. Please ensure the chatbot server is running.'
+        );
       }
       if (error.response?.data?.error) {
         throw new Error(error.response.data.error);
