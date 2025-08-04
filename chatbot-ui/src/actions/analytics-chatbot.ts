@@ -2,6 +2,8 @@ import type { IChatMessage } from 'src/types/chat';
 
 import axios from 'axios';
 
+import { CONFIG } from 'src/global-config';
+
 // ----------------------------------------------------------------------
 
 export type AnalyticsQuery = {
@@ -14,10 +16,66 @@ export type AnalyticsResponse = {
 
 // ----------------------------------------------------------------------
 
+export type ExportRequest = {
+  type: 'best_seller' | 'refund' | 'refund_reason' | 'revenue' | 'category' | 'brand' | 'slow_moving' | 'all';
+  platform?: string;
+  month?: string;
+  year?: number;
+  quarter?: string;
+  include_refund?: boolean;
+  limit?: number;
+  format?: 'pdf' | 'excel' | 'csv';
+  language?: 'vi' | 'en';
+};
+
+export async function exportDataToPdf(request: ExportRequest): Promise<void> {
+  try {
+    const exportUrl = CONFIG.api.exportPdfBaseUrl + '/api/export/direct';
+    const response = await axios.post(
+      exportUrl,
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        responseType: 'blob',
+        timeout: 120000, // 2 minute timeout for PDF processing
+      }
+    );
+
+    // Create blob URL for PDF download
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${request.type}_report_${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Export PDF error:', error);
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNREFUSED' || error.response?.status === 503) {
+        throw new Error('Export service is not available. Please ensure the export-pdf server is running.');
+      }
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+    }
+    throw new Error('Failed to export PDF. Please try again.');
+  }
+}
+
 export async function sendAnalyticsQuery(query: string): Promise<string> {
   try {
+    const chatUrl = CONFIG.api.chatbotBaseUrl ? CONFIG.api.chatbotBaseUrl + '/api/chat' : '/api/chat';
     const response = await axios.post<AnalyticsResponse>(
-      '/api/chat',
+      chatUrl,
       { message: query },
       {
         headers: {

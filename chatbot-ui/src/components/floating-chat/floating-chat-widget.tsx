@@ -5,12 +5,16 @@ import type { IChatMessage } from 'src/types/chat';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
+import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
+import Collapse from '@mui/material/Collapse';
 import TextField from '@mui/material/TextField';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -21,7 +25,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { DashboardContent } from 'src/layouts/dashboard';
 import { sendAnalyticsQuery, createAnalyticsMessage, exportDataToPdf, type ExportRequest } from 'src/actions/analytics-chatbot';
 
 import { Iconify } from 'src/components/iconify';
@@ -29,11 +32,10 @@ import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
-export function AnalyticsChatView() {
-  console.log('AnalyticsChatView rendering with export functionality');
-  
+export function FloatingChatWidget() {
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<IChatMessage[]>([
-    createAnalyticsMessage('Hello! I can help you analyze your sales data. Try asking me about your top-selling products, sales trends, or revenue analytics. You can also export your data as PDF reports!', false),
+    createAnalyticsMessage('Hello! I can help you analyze your sales data. Try asking me about your top-selling products, sales trends, or revenue analytics. Click the export button to generate PDF reports!', false),
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -55,12 +57,16 @@ export function AnalyticsChatView() {
     scrollToBottom();
   }, [messages]);
 
+  const handleToggleChat = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
+
   const handleSendMessage = useCallback(async () => {
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage = createAnalyticsMessage(inputMessage, true);
     const currentInput = inputMessage;
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
@@ -80,7 +86,7 @@ export function AnalyticsChatView() {
     }
   }, [inputMessage, isLoading]);
 
-  const handleKeyPress = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSendMessage();
@@ -120,25 +126,100 @@ export function AnalyticsChatView() {
     }
   }, [exportRequest]);
 
-  return (
-    <DashboardContent maxWidth="lg">
-      <Stack spacing={3}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4">Analytics Chatbot</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="solar:download-bold" />}
-            onClick={handleOpenExportDialog}
-            disabled={isLoading || isExporting}
-          >
-            Export Data
-          </Button>
-        </Box>
+  const handleQuickQuestion = useCallback((question: string) => {
+    setInputMessage(question);
+  }, []);
 
-        <Card sx={{ height: 600, display: 'flex', flexDirection: 'column' }}>
+  return (
+    <>
+      {/* Chat Window */}
+      <Collapse in={isOpen}>
+        <Paper
+          elevation={8}
+          sx={{
+            position: 'fixed',
+            bottom: 90,
+            right: 20,
+            width: 400,
+            height: 600,
+            zIndex: 1400,
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              p: 2,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+              borderTopLeftRadius: 2,
+              borderTopRightRadius: 2,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(255,255,255,0.2)' }}>
+                <Iconify icon="solar:chat-round-call-bold" width={18} />
+              </Avatar>
+              <Typography variant="subtitle1" fontWeight="bold">
+                Analytics AI
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              <IconButton
+                size="small"
+                onClick={handleOpenExportDialog}
+                disabled={isLoading || isExporting}
+                title="Export to PDF"
+                sx={{
+                  color: 'white',
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                  },
+                  '&:disabled': {
+                    color: 'rgba(255,255,255,0.5)',
+                  }
+                }}
+              >
+                <Iconify icon="solar:download-bold" width={16} />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={handleToggleChat}
+                sx={{
+                  color: 'white',
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                  }
+                }}
+              >
+                <Iconify icon="solar:close-circle-bold" width={16} />
+              </IconButton>
+            </Box>
+          </Box>
+
           {/* Messages */}
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Scrollbar sx={{ flex: 1, p: 3 }}>
+          <Box sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            overflow: 'hidden'
+          }}>
+            <Scrollbar sx={{
+              flex: 1,
+              p: 2,
+              minHeight: 0,
+              maxHeight: '100%'
+            }}>
               <Stack spacing={2}>
                 {messages.map((message) => (
                   <Box
@@ -150,25 +231,25 @@ export function AnalyticsChatView() {
                   >
                     <Box
                       sx={{
-                        maxWidth: '70%',
-                        p: 2,
+                        maxWidth: '80%',
+                        p: 1.5,
                         borderRadius: 2,
                         backgroundColor: message.senderId === 'user' ? 'primary.main' : 'grey.100',
                         color: message.senderId === 'user' ? 'primary.contrastText' : 'text.primary',
                       }}
                     >
-                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem' }}>
                         {message.body}
                       </Typography>
                     </Box>
                   </Box>
                 ))}
-                
+
                 {isLoading && (
                   <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                     <Box
                       sx={{
-                        p: 2,
+                        p: 1.5,
                         borderRadius: 2,
                         backgroundColor: 'grey.100',
                         display: 'flex',
@@ -176,9 +257,9 @@ export function AnalyticsChatView() {
                         gap: 1,
                       }}
                     >
-                      <CircularProgress size={16} />
-                      <Typography variant="body2" color="text.secondary">
-                        Analyzing your data...
+                      <CircularProgress size={12} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                        Analyzing...
                       </Typography>
                     </Box>
                   </Box>
@@ -188,91 +269,111 @@ export function AnalyticsChatView() {
             </Scrollbar>
           </Box>
 
+          {/* Quick Questions */}
+          <Box sx={{
+            p: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            bgcolor: 'grey.50',
+            flexShrink: 0
+          }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              Quick questions:
+            </Typography>
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+              {[
+                'Top products?',
+                'Sales trends?',
+                'Revenue Q2?',
+                'Refund rates?',
+              ].map((question) => (
+                <Button
+                  key={question}
+                  size="small"
+                  variant="outlined"
+                  onClick={() => handleQuickQuestion(question)}
+                  disabled={isLoading}
+                  sx={{
+                    fontSize: '0.7rem',
+                    py: 0.5,
+                    px: 1,
+                    minWidth: 'auto',
+                    borderRadius: 3,
+                  }}
+                >
+                  {question}
+                </Button>
+              ))}
+            </Stack>
+          </Box>
+
           {/* Input */}
-          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Box sx={{
+            p: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            flexShrink: 0,
+            borderBottomLeftRadius: 2,
+            borderBottomRightRadius: 2
+          }}>
             <InputBase
               fullWidth
               multiline
-              maxRows={4}
+              maxRows={3}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Ask me about your sales data..."
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about your data..."
               disabled={isLoading}
               endAdornment={
-                <IconButton 
-                  onClick={handleSendMessage} 
+                <IconButton
+                  onClick={handleSendMessage}
                   disabled={!inputMessage.trim() || isLoading}
                   color="primary"
+                  size="small"
                 >
-                  <Iconify icon="solar:arrow-right-linear" />
+                  <Iconify icon="solar:arrow-right-linear" width={16} />
                 </IconButton>
               }
               sx={{
-                py: 1.5,
-                px: 2,
+                py: 1,
+                px: 1.5,
                 border: 1,
                 borderColor: 'divider',
                 borderRadius: 1,
+                fontSize: '0.85rem',
                 '&:hover': {
                   borderColor: 'primary.main',
                 },
                 '&.Mui-focused': {
                   borderColor: 'primary.main',
-                  borderWidth: 2,
                 },
               }}
             />
           </Box>
-        </Card>
+        </Paper>
+      </Collapse>
 
-        {/* Quick Actions */}
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Quick Questions
-          </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {[
-              'What are my top 5 selling products?',
-              'Show me sales trends for this month',
-              'Which platform performs better: Shopee or Lazada?',
-              'What is my total revenue for Q2 2025?',
-              'Show inventory analytics',
-              'Which products have high refund rates?',
-              'What are the main refund reasons?',
-              'Show me slow-moving inventory',
-              'Analyze sales by category',
-              'Compare brand performance',
-            ].map((question) => (
-              <Box
-                key={question}
-                component="button"
-                onClick={() => setInputMessage(question)}
-                disabled={isLoading}
-                sx={{
-                  p: 1.5,
-                  border: 1,
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  backgroundColor: 'background.paper',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    backgroundColor: 'primary.lighter',
-                  },
-                  '&:disabled': {
-                    opacity: 0.5,
-                    cursor: 'not-allowed',
-                  },
-                }}
-              >
-                <Typography variant="body2">{question}</Typography>
-              </Box>
-            ))}
-          </Stack>
-        </Card>
-      </Stack>
+      {/* Floating Action Button */}
+      <Fab
+        color="primary"
+        onClick={handleToggleChat}
+        sx={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          zIndex: 1300,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+          },
+        }}
+      >
+        <Iconify
+          icon={isOpen ? "solar:close-circle-bold" : "solar:chat-round-call-bold"}
+          width={24}
+        />
+      </Fab>
 
       {/* Export Dialog */}
       <Dialog open={isExportDialogOpen} onClose={handleCloseExportDialog} maxWidth="sm" fullWidth>
@@ -428,6 +529,6 @@ export function AnalyticsChatView() {
           </Button>
         </DialogActions>
       </Dialog>
-    </DashboardContent>
+    </>
   );
 }

@@ -15,6 +15,7 @@ import { allLangs } from 'src/locales';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
+import { FloatingChatWidget } from 'src/components/floating-chat';
 
 import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
@@ -200,6 +201,7 @@ export function DashboardLayout({
       ]}
     >
       {renderMain()}
+      <FloatingChatWidget />
     </LayoutSection>
   );
 }

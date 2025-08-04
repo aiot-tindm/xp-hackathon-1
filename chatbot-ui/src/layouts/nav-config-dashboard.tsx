@@ -55,6 +55,15 @@ export const navData: NavSectionProps['data'] = [
     ],
   },
   /**
+   * Communication
+   */
+  {
+    subheader: 'Communication',
+    items: [
+      { title: 'Chat', path: paths.dashboard.chat, icon: ICONS.chat },
+    ],
+  },
+  /**
    * Management
    */
   {

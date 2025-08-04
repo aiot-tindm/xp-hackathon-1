@@ -16,6 +16,10 @@ export type ConfigValue = {
     redirectPath: string;
   };
   mapboxApiKey: string;
+  api: {
+    chatbotBaseUrl: string;
+    exportPdfBaseUrl: string;
+  };
 };
 
 // ----------------------------------------------------------------------
@@ -39,4 +43,11 @@ export const CONFIG: ConfigValue = {
    * Mapbox
    */
   mapboxApiKey: process.env.NEXT_PUBLIC_MAPBOX_API_KEY ?? '',
+  /**
+   * API Base URLs
+   */
+  api: {
+    chatbotBaseUrl: process.env.NEXT_PUBLIC_CHATBOT_BASE_URL ?? '',
+    exportPdfBaseUrl: process.env.NEXT_PUBLIC_EXPORT_PDF_BASE_URL ?? 'http://localhost:3000',
+  },
 };
