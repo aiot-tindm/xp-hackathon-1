@@ -2,9 +2,9 @@ FROM node:20
 
 WORKDIR /app
 
-# Cài đặt tất cả dependencies (bao gồm devDependencies cho build)
+# Cài đặt các dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy mã nguồn
 COPY . .
@@ -12,11 +12,8 @@ COPY . .
 # Build ứng dụng
 RUN npm run build
 
-# Xóa devDependencies sau khi build để giảm kích thước image
-RUN npm prune --production
-
 # Expose port
 EXPOSE 8082
 
-# Chạy ứng dụng production
+# Chạy ứng dụng
 CMD ["npm", "run", "start"]
