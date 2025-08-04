@@ -4,8 +4,8 @@ import { RHFEditor } from './rhf-editor';
 import { RHFSlider } from './rhf-slider';
 import { RHFTextField } from './rhf-text-field';
 import { RHFRadioGroup } from './rhf-radio-group';
-// import { RHFPhoneInput } from './rhf-phone-input';
-// import { RHFNumberInput } from './rhf-number-input';
+import { RHFPhoneInput } from './rhf-phone-input';
+import { RHFNumberInput } from './rhf-number-input';
 import { RHFAutocomplete } from './rhf-autocomplete';
 import { RHFCountrySelect } from './rhf-country-select';
 import { RHFSwitch, RHFMultiSwitch } from './rhf-switch';
@@ -25,12 +25,12 @@ export const Field = {
   Slider: RHFSlider,
   Rating: RHFRating,
   Text: RHFTextField,
-  // Phone: RHFPhoneInput,
+  Phone: RHFPhoneInput,
   Checkbox: RHFCheckbox,
   UploadBox: RHFUploadBox,
   RadioGroup: RHFRadioGroup,
   DatePicker: RHFDatePicker,
-  // NumberInput: RHFNumberInput,
+  NumberInput: RHFNumberInput,
   MultiSelect: RHFMultiSelect,
   MultiSwitch: RHFMultiSwitch,
   UploadAvatar: RHFUploadAvatar,
