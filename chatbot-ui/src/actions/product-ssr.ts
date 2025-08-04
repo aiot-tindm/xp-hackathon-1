@@ -1,19 +1,22 @@
-import axios, { endpoints } from 'src/lib/axios';
+import { _products } from 'src/_mock/_product';
 
 // ----------------------------------------------------------------------
 
 export async function getProducts() {
-  const res = await axios.get(endpoints.product.list);
-
-  return res.data;
+  const products = _products();
+  
+  return {
+    products,
+  };
 }
 
 // ----------------------------------------------------------------------
 
 export async function getProduct(id: string) {
-  const URL = id ? `${endpoints.product.details}?productId=${id}` : '';
-
-  const res = await axios.get(URL);
-
-  return res.data;
+  const products = _products();
+  const product = products.find((p) => p.id === id);
+  
+  return {
+    product,
+  };
 }
