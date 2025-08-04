@@ -7,7 +7,7 @@ import { specs } from './config/swagger';
 import { testConnection } from './config/database';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // CORS configuration
 const corsOptions = {
