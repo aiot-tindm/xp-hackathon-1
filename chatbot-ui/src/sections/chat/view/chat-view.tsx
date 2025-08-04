@@ -13,6 +13,11 @@ import { useGetContacts, useGetConversation, useGetConversations } from 'src/act
 
 import { EmptyContent } from 'src/components/empty-content';
 
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
 import { useMockedUser } from 'src/auth/hooks';
 
 import { ChatNav } from '../chat-nav';
@@ -110,11 +115,99 @@ export function ChatView() {
                   />
                 )
               ) : (
-                <EmptyContent
-                  title="Good morning!"
-                  description="Write something awesome..."
-                  imgUrl={`${CONFIG.assetsDir}/assets/icons/empty/ic-chat-active.svg`}
-                />
+                <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <EmptyContent
+                    title="Chào buổi sáng!"
+                    description="Hãy viết gì đó thật tuyệt vời..."
+                    imgUrl={`${CONFIG.assetsDir}/assets/icons/empty/ic-chat-active.svg`}
+                  />
+                  
+                  {/* Quick Suggestions */}
+                  <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto', width: '100%' }}>
+                    <Typography variant="h6" sx={{ mb: 2, textAlign: 'center' }}>
+                      Gợi ý tin nhắn nhanh
+                    </Typography>
+                    <Stack spacing={1}>
+                      {[
+                        'Xin chào! Bạn khỏe không?',
+                        'Hôm nay công việc thế nào?',
+                        'Có tin gì mới không?',
+                        'Chúng ta hẹn gặp nhau nhé!',
+                        'Cảm ơn bạn rất nhiều!',
+                      ].map((suggestion, index) => (
+                        <Box
+                          key={index}
+                          component="button"
+                          sx={{
+                            p: 2,
+                            border: 1,
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            backgroundColor: 'background.paper',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              borderColor: 'primary.main',
+                              backgroundColor: 'primary.lighter',
+                            },
+                          }}
+                        >
+                          <Typography variant="body2">{suggestion}</Typography>
+                        </Box>
+                      ))}
+                    </Stack>
+
+                    {/* API Integration Suggestions */}
+                    <Card sx={{ mt: 4, p: 3 }}>
+                      <Typography variant="h6" sx={{ mb: 2 }}>
+                        🔧 Gợi ý tích hợp API
+                      </Typography>
+                      <Stack spacing={2}>
+                        <Box>
+                          <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
+                            💬 Chat API Endpoints:
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            • POST /api/chat/send - Gửi tin nhắn
+                            <br />
+                            • GET /api/chat/conversations - Lấy danh sách cuộc trò chuyện
+                            <br />
+                            • GET /api/chat/messages/:id - Lấy tin nhắn theo cuộc trò chuyện
+                            <br />
+                            • WebSocket /ws/chat - Nhận tin nhắn real-time
+                          </Typography>
+                        </Box>
+                        
+                        <Box>
+                          <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
+                            📁 File & Media API:
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            • POST /api/upload/image - Upload hình ảnh
+                            <br />
+                            • POST /api/upload/file - Upload file đính kèm
+                            <br />
+                            • GET /api/media/:id - Lấy file media
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
+                            👥 User & Contact API:
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            • GET /api/users/contacts - Danh sách liên hệ
+                            <br />
+                            • POST /api/users/add-contact - Thêm liên hệ mới
+                            <br />
+                            • GET /api/users/online - Người dùng đang online
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Card>
+                  </Box>
+                </Box>
               )}
 
               <ChatMessageInput

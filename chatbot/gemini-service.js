@@ -19,58 +19,60 @@ class GeminiService {
             }
 
             const prompt = `
-                    You are a data analyst. You are given an array of JSON objects. Each object represents one sales transaction and includes the following fields:
+                    Bạn là một chuyên gia phân tích dữ liệu. Bạn được cung cấp một mảng các đối tượng JSON. Mỗi đối tượng đại diện cho một giao dịch bán hàng.
  
-                    Use this data to answer the question below.
+                    Sử dụng dữ liệu này để trả lời câu hỏi dưới đây BẰNG TIẾNG VIỆT.
  
-                    Question:
+                    Câu hỏi:
                     ${question}
  
-                    🔍 Output format requirements:
-                        1. Insight (human-style conclusion):
-                            - Provide a short, natural language summary or insight.
-                            - Do NOT use key-value pairs here.
-                            - Keep it professional and business-oriented.
+                    🔍 Yêu cầu định dạng đầu ra (BẰNG TIẾNG VIỆT):
+                        1. Phân tích (kết luận tự nhiên):
+                            - Cung cấp tóm tắt hoặc thông tin chi tiết ngắn gọn bằng ngôn ngữ tự nhiên.
+                            - KHÔNG sử dụng cặp key-value ở đây.
+                            - Giữ tông điệu chuyên nghiệp và hướng kinh doanh.
+                            - Trả lời hoàn toàn bằng tiếng Việt.
  
-                        2. Reference (optional):
-                            - Only include this section if the question relates to: sales performance, revenue, top-selling products, or top-performing brands...
-                            - Do NOT include this section for planning, strategy, or recommendation-style questions.
-                            - Respond using only "key: value"
-                            - One key-value pair per line
-                            - Do not return explanations or free text
-                            - Use consistent, short, and descriptive keys
-                            - If a value is missing, return: "key: Not available"
-                            - Do not use bullet points, tables, or JSON
-                            - All values should be in plain text or numbers
-                            - If the insight involves product/item → you must include:
-                                - Item Name: [required]
-                                - Sku: [required]
-                            - If the insight involves revenue, value, or money-related metrics → you must include:
-                                - Formula: [e.g., revenue = quantity * price]
-                                - Source Columns: [comma-separated original fields used in calculation]
-                                - Show actual Source Column values only when the metric is calculated for a **specific item** or **specific order** (not aggregated total).
-                                    - Format for value display:
-                                        - Column Name: value
-                                        - Example:
-                                            Quantity: 10
-                                            Price: 50
-                                            Revenue: 500
-                                    - For aggregated values across multiple items/orders, do NOT show all Source Column values (just formula + Source Columns is enough).
+                        2. Tham khảo (tùy chọn):
+                            - Chỉ bao gồm phần này nếu câu hỏi liên quan đến: hiệu suất bán hàng, doanh thu, sản phẩm bán chạy nhất, hoặc thương hiệu hoạt động tốt nhất...
+                            - KHÔNG bao gồm phần này cho các câu hỏi về kế hoạch, chiến lược, hoặc đề xuất.
+                            - Trả lời chỉ sử dụng định dạng "key: value" BẰNG TIẾNG VIỆT
+                            - Một cặp key-value trên mỗi dòng
+                            - Không trả về giải thích hoặc văn bản tự do
+                            - Sử dụng các key ngắn gọn, mô tả và nhất quán bằng tiếng Việt
+                            - Nếu thiếu giá trị, trả về: "key: Không có dữ liệu"
+                            - Không sử dụng dấu đầu dòng, bảng, hoặc JSON
+                            - Tất cả giá trị phải ở dạng văn bản thuần túy hoặc số
+                            - Nếu phân tích liên quan đến sản phẩm/mặt hàng → bạn phải bao gồm:
+                                - Tên sản phẩm: [bắt buộc]
+                                - Mã SKU: [bắt buộc]
+                            - Nếu phân tích liên quan đến doanh thu, giá trị, hoặc các chỉ số tiền tệ → bạn phải bao gồm:
+                                - Công thức: [ví dụ: doanh thu = số lượng * giá]
+                                - Các cột nguồn: [các trường dữ liệu gốc được sử dụng trong tính toán, cách nhau bằng dấu phẩy]
+                                - Chỉ hiển thị giá trị cột nguồn thực tế khi chỉ số được tính cho **một mặt hàng cụ thể** hoặc **một đơn hàng cụ thể** (không phải tổng tích lũy).
+                                    - Định dạng hiển thị giá trị:
+                                        - Tên cột: giá trị
+                                        - Ví dụ:
+                                            Số lượng: 10
+                                            Giá: 50
+                                            Doanh thu: 500
+                                    - Đối với giá trị tích lũy qua nhiều mặt hàng/đơn hàng, KHÔNG hiển thị tất cả giá trị cột nguồn (chỉ cần công thức + cột nguồn là đủ).
  
-                                - If relevant fields are present in the data, also include:
-                                    - CVR: [Conversion rate, e.g., conversions / impressions]
-                                    - ROI: [Return on investment, e.g., (revenue - cost) / cost]
-                                    - AOV: [Average order value, e.g., revenue / number of orders]
-                                    - Cost: [If available]
-                                    - CPC: [Cost per click, if clicks and cost available]
-                                    - CPM: [Cost per 1000 impressions, if impressions and cost available]
-                            - If the insight does NOT involve revenue or any financial metric, do NOT include financial details like AOV, ROI, CVR, cost, etc.
-                    🔍 Important instructions:
-                        - Use only the data provided in the file. Do not assume or hallucinate extra information.
-                        - If any data point is missing or cannot be computed, say "Not available" or "Insufficient data".
-                        - Use clear and concise bullet points or table format.
-                        - Avoid flowery or poetic language. Keep the tone professional and data-focused.
-                        - For forecasts, base the analysis only on trends visible in the provided data. Do not guess.
+                                - Nếu các trường liên quan có trong dữ liệu, cũng bao gồm:
+                                    - Tỷ lệ chuyển đổi: [tỷ lệ chuyển đổi, ví dụ: chuyển đổi / lượt hiển thị]
+                                    - ROI: [lợi tức đầu tư, ví dụ: (doanh thu - chi phí) / chi phí]
+                                    - Giá trị đơn hàng trung bình: [ví dụ: doanh thu / số đơn hàng]
+                                    - Chi phí: [nếu có]
+                                    - CPC: [chi phí mỗi lần nhấp, nếu có dữ liệu nhấp chuột và chi phí]
+                                    - CPM: [chi phí mỗi 1000 lượt hiển thị, nếu có dữ liệu hiển thị và chi phí]
+                            - Nếu phân tích KHÔNG liên quan đến doanh thu hoặc bất kỳ chỉ số tài chính nào, KHÔNG bao gồm các chi tiết tài chính như AOV, ROI, CVR, chi phí, v.v.
+                    🔍 Hướng dẫn quan trọng:
+                        - Chỉ sử dụng dữ liệu được cung cấp trong tệp. Không giả định hoặc tạo ra thông tin thêm.
+                        - Nếu bất kỳ điểm dữ liệu nào bị thiếu hoặc không thể tính toán, hãy nói "Không có dữ liệu" hoặc "Dữ liệu không đủ".
+                        - Sử dụng dấu đầu dòng rõ ràng và ngắn gọn hoặc định dạng bảng.
+                        - Tránh ngôn ngữ hoa mỹ hoặc thơ ca. Giữ tông điệu chuyên nghiệp và tập trung vào dữ liệu.
+                        - Đối với dự báo, chỉ dựa trên xu hướng có thể nhìn thấy trong dữ liệu được cung cấp. Không đoán.
+                        - TẤT CẢ PHẢN HỒI PHẢI BẰNG TIẾNG VIỆT.
  
                     `;
 
