@@ -27,9 +27,9 @@ Hệ thống phân tích khách hàng toàn diện để hiểu rõ hành vi mua
 
 ### 🐋 Whale Customers (Khách hàng VIP cao cấp)
 - **Criteria**: 
-  - Tổng chi tiêu > 50 triệu VND
-  - Số đơn hàng ≥ 10
-  - Giá trị đơn hàng trung bình > 3 triệu VND
+  - Tổng chi tiêu > $80,000 USD
+  - Số đơn hàng ≥ 15
+  - Giá trị đơn hàng trung bình > $4,000 USD
 - **Characteristics**: 
   - Mua sắm thường xuyên, giá trị cao
   - Thích sản phẩm premium
@@ -41,9 +41,9 @@ Hệ thống phân tích khách hàng toàn diện để hiểu rõ hành vi mua
 
 ### 👑 VIP Customers (Khách hàng VIP)
 - **Criteria**:
-  - Tổng chi tiêu 10-50 triệu VND
-  - Số đơn hàng 5-15
-  - Giá trị đơn hàng trung bình 1-3 triệu VND
+  - Tổng chi tiêu $40,000-$80,000 USD
+  - Số đơn hàng 10-15
+  - Giá trị đơn hàng trung bình $2,000-$4,000 USD
 - **Characteristics**:
   - Mua sắm định kỳ
   - Quan tâm cả giá và chất lượng
@@ -55,9 +55,9 @@ Hệ thống phân tích khách hàng toàn diện để hiểu rõ hành vi mua
 
 ### 👥 Regular Customers (Khách hàng thường xuyên)
 - **Criteria**:
-  - Tổng chi tiêu 2-10 triệu VND
-  - Số đơn hàng 3-8
-  - Giá trị đơn hàng trung bình 500K-1 triệu VND
+  - Tổng chi tiêu $10,000-$40,000 USD
+  - Số đơn hàng 5-10
+  - Giá trị đơn hàng trung bình $1,000-$2,000 USD
 - **Characteristics**:
   - Mua sắm theo nhu cầu
   - Quan tâm giá cả
@@ -82,7 +82,7 @@ Hệ thống phân tích khách hàng toàn diện để hiểu rõ hành vi mua
 
 ### 🚶 Churn Customers (Khách hàng rời đi)
 - **Criteria**:
-  - Không mua hàng > 90 ngày
+  - Không mua hàng > 500 ngày
   - Có lịch sử mua hàng trước đó
 - **Characteristics**:
   - Không hài lòng với sản phẩm/dịch vụ
@@ -117,9 +117,9 @@ Hệ thống phân tích khách hàng toàn diện để hiểu rõ hành vi mua
 
 ## 🔧 Technical Implementation
 
-### 🎛️ Dynamic Segmentation Configuration
+### 🎛️ Segmentation Configuration
 
-Hệ thống Customer Analytics hỗ trợ **cấu hình động** cho các tiêu chí phân loại khách hàng, cho phép tùy chỉnh theo từng hệ thống và tệp khách hàng khác nhau.
+Hệ thống Customer Analytics sử dụng **cấu hình thống nhất** cho các tiêu chí phân loại khách hàng, đảm bảo tính nhất quán và dễ bảo trì.
 
 #### Configuration Interface
 ```typescript
@@ -150,23 +150,23 @@ interface SegmentationConfig {
 ```typescript
 const DEFAULT_SEGMENTATION_CONFIG: SegmentationConfig = {
   whale: {
-    minTotalSpent: 600,         // $600 USD - Top 5% customers
-    minOrders: 8,               // Above average (12.7/2)
-    minAvgOrderValue: 60        // $60 USD per order
+    minTotalSpent: 80000,       // $80,000 USD - Top 10% customers (very high value)
+    minOrders: 15,              // High frequency
+    minAvgOrderValue: 4000      // $4,000 USD per order
   },
   vip: {
-    minTotalSpent: 200,         // $200 USD
-    maxTotalSpent: 600,         // $600 USD
-    minOrders: 5,               // Moderate frequency
-    minAvgOrderValue: 32        // $32 USD per order
+    minTotalSpent: 40000,       // $40,000 USD
+    maxTotalSpent: 80000,       // $80,000 USD
+    minOrders: 10,              // High frequency
+    minAvgOrderValue: 2000      // $2,000 USD per order
   },
   regular: {
-    minTotalSpent: 40,          // $40 USD
-    maxTotalSpent: 200,         // $200 USD
-    minOrders: 3                // At least 3 orders in 6 months
+    minTotalSpent: 10000,       // $10,000 USD
+    maxTotalSpent: 40000,       // $40,000 USD
+    minOrders: 5                // Moderate frequency
   },
   churn: {
-    maxDaysSinceLastOrder: 90   // 90 days (3 months) - reasonable for 6-month data
+    maxDaysSinceLastOrder: 500  // 500 days - adjusted for historical data from 2024
   }
 };
 ```
@@ -181,34 +181,9 @@ const DEFAULT_SEGMENTATION_CONFIG: SegmentationConfig = {
 
 #### Usage Examples
 
-**1. E-commerce với giá trị cao (hàng xa xỉ):**
+**E-commerce tổng quát (mặc định):**
 ```http
-GET /api/analytics/customers/segmentation?businessType=high_value
-```
-
-**2. E-commerce với tần suất mua hàng cao (nhu yếu phẩm):**
-```http
-GET /api/analytics/customers/segmentation?businessType=high_frequency
-```
-
-**3. E-commerce doanh nghiệp nhỏ:**
-```http
-GET /api/analytics/customers/segmentation?businessType=small_business
-```
-
-**4. E-commerce tổng quát (mặc định):**
-```http
-GET /api/analytics/customers/segmentation?businessType=default
-```
-
-**5. E-commerce điện tử (iPhone, Samsung, MacBook):**
-```http
-GET /api/analytics/customers/segmentation?businessType=electronics
-```
-
-**6. E-commerce thời trang thể thao (Nike, Adidas, Puma):**
-```http
-GET /api/analytics/customers/segmentation?businessType=fashion
+GET /api/analytics/customers/segmentation
 ```
 
 ### Database Schema Analysis
@@ -502,7 +477,6 @@ POST /api/analytics/customers/predictions
   "customerIds": [1, 2, 3, 4, 5],
   "predictionType": "all",
   "months": 12,
-  "businessType": "default",
   "includeRecommendations": true
 }
 ```
@@ -511,7 +485,7 @@ POST /api/analytics/customers/predictions
 - `customerIds` (required): Array các ID khách hàng cần phân tích
 - `predictionType` (optional): Loại dự đoán ("clv", "churn", "purchase", "all") - mặc định: "all"
 - `months` (optional): Số tháng để dự đoán - mặc định: 12
-- `businessType` (optional): Loại business ("default", "high_value", "electronics", "fashion", "small_business") - mặc định: "default"
+
 - `includeRecommendations` (optional): Bao gồm recommendations - mặc định: true
 
 **Response Example:**
@@ -665,20 +639,20 @@ curl -X POST /api/analytics/customers/predictions \
   -H "Content-Type: application/json" \
   -d '{"customerIds": [1,2,3,4,5,6,7,8,9,10], "predictionType": "all", "months": 24}'
 
-# Dự đoán với recommendations cho business electronics
+# Dự đoán với recommendations
 curl -X POST /api/analytics/customers/predictions \
   -H "Content-Type: application/json" \
-  -d '{"customerIds": [1,2,3], "businessType": "electronics", "includeRecommendations": true}'
+  -d '{"customerIds": [1,2,3], "includeRecommendations": true}'
 
 # Dự đoán chỉ CLV không bao gồm recommendations
 curl -X POST /api/analytics/customers/predictions \
   -H "Content-Type: application/json" \
   -d '{"customerIds": [1,2,3], "predictionType": "clv", "includeRecommendations": false}'
 
-# Dự đoán cho high-value business với recommendations
+# Dự đoán với recommendations
 curl -X POST /api/analytics/customers/predictions \
   -H "Content-Type: application/json" \
-  -d '{"customerIds": [10,15,20], "businessType": "high_value", "includeRecommendations": true}'
+  -d '{"customerIds": [10,15,20], "includeRecommendations": true}'
 ```
 
 
@@ -692,7 +666,6 @@ GET /api/analytics/customers/rfm
 
 **Query Parameters:**
 - `customerId` (optional): ID khách hàng cụ thể
-- `businessType` (optional): Loại business (default, high_value, small_business)
 
 **Response Example:**
 ```json
@@ -739,12 +712,11 @@ GET /api/analytics/customers/rfm
         "cant_lose": 8,
         "lost": 2
       },
-      "config": {
-        "businessType": "default",
-        "recencyThresholds": [30, 60, 90, 180],
-        "frequencyThresholds": [2, 3, 5, 10],
-        "monetaryThresholds": [500, 2000, 10000, 50000]
-      }
+              "config": {
+          "recencyThresholds": [30, 60, 90, 180],
+          "frequencyThresholds": [2, 3, 5, 10],
+          "monetaryThresholds": [500, 2000, 10000, 50000]
+        }
     }
   }
 }
@@ -801,11 +773,8 @@ GET /api/analytics/customers/rfm
 # RFM analysis cho customer cụ thể
 GET /api/analytics/customers/rfm?customerId=1
 
-# RFM analysis với high-value business config
-GET /api/analytics/customers/rfm?businessType=high_value
-
-# RFM analysis với small business config
-GET /api/analytics/customers/rfm?businessType=small_business
+# RFM analysis cho tất cả customers
+GET /api/analytics/customers/rfm
 ```
 
 ### 5. Customer Churn Prediction
@@ -817,7 +786,6 @@ GET /api/analytics/customers/churn-prediction
 
 **Query Parameters:**
 - `days` (optional): Thời gian không hoạt động (mặc định: 90 ngày)
-- `businessType` (optional): Loại business (default, high_value, small_business)
 - `includeAllCustomers` (optional): Phân tích tất cả customers thay vì chỉ inactive (mặc định: false)
 
 **Response Example:**
@@ -880,12 +848,11 @@ GET /api/analytics/customers/churn-prediction
       "lowRisk": 15,
       "avgChurnRisk": 0.45,
       "totalRevenueAtRisk": 12500,
-      "config": {
-        "businessType": "default",
-        "inactivityThresholds": [30, 60, 90, 180, 365],
-        "frequencyThresholds": [1, 2, 3, 5, 10],
-        "valueThresholds": [100, 500, 1000, 5000, 10000]
-      }
+              "config": {
+          "inactivityThresholds": [30, 60, 90, 180, 365],
+          "frequencyThresholds": [1, 2, 3, 5, 10],
+          "valueThresholds": [100, 500, 1000, 5000, 10000]
+        }
     }
   }
 }
@@ -939,11 +906,11 @@ GET /api/analytics/customers/churn-prediction
 # Churn prediction cho inactive customers với default config
 GET /api/analytics/customers/churn-prediction
 
-# Churn prediction cho tất cả customers với high-value config
-GET /api/analytics/customers/churn-prediction?businessType=high_value&includeAllCustomers=true
+# Churn prediction cho tất cả customers
+GET /api/analytics/customers/churn-prediction?includeAllCustomers=true
 
-# Churn prediction cho customers inactive 60+ days với small business config
-GET /api/analytics/customers/churn-prediction?days=60&businessType=small_business
+# Churn prediction cho customers inactive 60+ days
+GET /api/analytics/customers/churn-prediction?days=60
 ```
 
 ## 🎯 Business Intelligence
@@ -1133,7 +1100,7 @@ GET /api/analytics/customers/new-inventory-matching
 - `productIds` (optional): Danh sách ID sản phẩm (comma-separated)
 - `categoryIds` (optional): Danh sách ID danh mục (comma-separated)
 - `limit` (optional): Số lượng khách hàng (mặc định: 10)
-- `businessType` (optional): Loại cấu hình business - "default", "high_value", "small_business" (mặc định: "default")
+
 
 **Response Example:**
 ```json
@@ -1192,12 +1159,11 @@ GET /api/analytics/customers/new-inventory-matching
       "mediumInterestCustomers": 30,
       "lowInterestCustomers": 20,
       "totalPotentialRevenue": 18750,
-      "config": {
-        "businessType": "default",
-        "purchaseFrequencyThresholds": [1, 3, 5, 10, 20],
-        "totalSpentThresholds": [100, 500, 1000, 5000, 10000],
-        "recencyThresholds": [30, 60, 90, 180, 365]
-      }
+              "config": {
+          "purchaseFrequencyThresholds": [1, 3, 5, 10, 20],
+          "totalSpentThresholds": [100, 500, 1000, 5000, 10000],
+          "recencyThresholds": [30, 60, 90, 180, 365]
+        }
     }
   }
 }

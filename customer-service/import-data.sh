@@ -1,14 +1,14 @@
 #! /bin/bash
 
 # Check if backend is running
-if ! curl -s http://localhost:4001/health > /dev/null; then
+if ! curl -s http://localhost:9005/customer-service/health > /dev/null; then
   echo "❌ Backend is not running"
   exit 1
 fi
 
 # Import data
 echo "🗄️ Importing data..."
-result=$(curl -X POST http://localhost:4001/api/import/all \
+result=$(curl -X POST http://localhost:9005/customer-service/api/import/all \
   -F "brands=@database/csv-data/brands.csv" \
   -F "categories=@database/csv-data/categories.csv" \
   -F "customers=@database/csv-data/customers.csv" \

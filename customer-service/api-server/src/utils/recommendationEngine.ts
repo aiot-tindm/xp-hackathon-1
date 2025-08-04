@@ -198,7 +198,7 @@ export const popularityBasedFiltering = async (config: RecommendationConfig): Pr
     take: config.limits.products
   });
 
-  const productIds = popularProducts.map(p => p.itemId);
+  const productIds = popularProducts.map((p: any) => p.itemId);
   const products = await prisma.item.findMany({
     where: {
       id: { in: productIds },
@@ -377,7 +377,7 @@ const findSimilarCustomers = async (customerId: number, preferences: CustomerPre
     }
   });
 
-  return similarCustomers.map(c => c.customerId);
+  return similarCustomers.map((c: any) => c.customerId);
 };
 
 const getProductsFromSimilarCustomers = async (customerId: number, similarCustomers: number[]): Promise<any[]> => {
@@ -407,12 +407,12 @@ const getProductsFromSimilarCustomers = async (customerId: number, similarCustom
     select: { itemId: true }
   });
 
-  const customerProductIds = new Set(customerProducts.map(p => p.itemId));
+  const customerProductIds = new Set(customerProducts.map((p: any) => p.itemId));
   
   return purchasedProducts
-    .filter(p => !customerProductIds.has(p.itemId))
-    .map(p => p.item)
-    .filter((item, index, arr) => arr.findIndex(i => i.id === item.id) === index); // Remove duplicates
+    .filter((p: any)   => !customerProductIds.has(p.itemId))
+    .map((p: any) => p.item)
+    .filter((item: any, index: any, arr: any) => arr.findIndex((i: any) => i.id === item.id) === index); // Remove duplicates
 };
 
 const calculateCollaborativeConfidence = (product: any, similarCustomers: number[]): number => {

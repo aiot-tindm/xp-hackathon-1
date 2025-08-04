@@ -161,4 +161,18 @@ model OrderItem {
   item  Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@map("order_items")
+}
+
+// Configuration Tables
+model SystemConfig {
+  id          String   @id @default(cuid())
+  configType  String   @map("config_type") @db.VarChar(50) // 'segmentation', 'churn', 'rfm', 'recommendation', 'potential_customers'
+  businessType String  @default("default") @map("business_type") @db.VarChar(191)
+  config      Json
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([configType, businessType])
+  @@map("system_config")
 } 

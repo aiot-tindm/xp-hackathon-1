@@ -7,6 +7,86 @@ import {
 } from '../config/customerSegmentationConfig';
 import { calculateCLV } from '../utils/clvCalculator';
 
+// Type definitions for Prisma objects
+interface OrderItem {
+  id: number;
+  orderId: number;
+  itemId: number;
+  quantity: number;
+  pricePerUnit: any; // Decimal type from Prisma
+  discountAmount: any; // Decimal type from Prisma
+  createdAt: Date;
+  updatedAt: Date;
+  item: {
+    id: number;
+    sku: string;
+    name: string;
+    costPrice: any; // Decimal type from Prisma
+    salePrice: any; // Decimal type from Prisma
+    stockQuantity: number;
+    brandId?: number;
+    categoryId?: number;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    category?: {
+      id: number;
+      name: string;
+    };
+    brand?: {
+      id: number;
+      name: string;
+    };
+  };
+}
+
+interface Order {
+  id: number;
+  orderCode: string;
+  customerId: number;
+  shippingLocation?: string;
+  platform: string;
+  orderDate: Date;
+  status: string;
+  refundReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  customer: {
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber?: string;
+    createdAt: Date;
+    loyalCustomer?: {
+      loyaltySegment: string;
+      totalOrders: number;
+    };
+  };
+  orderItems: OrderItem[];
+}
+
+interface Item {
+  id: number;
+  sku: string;
+  name: string;
+  costPrice: any; // Decimal type from Prisma
+  salePrice: any; // Decimal type from Prisma
+  stockQuantity: number;
+  brandId?: number;
+  categoryId?: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  category?: {
+    id: number;
+    name: string;
+  };
+  brand?: {
+    id: number;
+    name: string;
+  };
+}
+
 // Types for customer analytics
 interface CustomerSegment {
   count: number;
@@ -52,13 +132,13 @@ interface CustomerBehavior {
 }
 
 // Helper function to calculate customer segment with dynamic config
-const calculateCustomerSegment = (
+const calculateCustomerSegment = async (
   totalSpent: number,
   totalOrders: number,
   avgOrderValue: number,
   daysSinceLastOrder: number,
-  config: SegmentationConfig = getSegmentationConfig()
-): string => {
+  config: SegmentationConfig
+): Promise<string> => {
   // Check for churn first
   if (daysSinceLastOrder > config.churn.maxDaysSinceLastOrder) {
     return 'churn';
@@ -105,7 +185,7 @@ import {
 export const getCustomerAnalytics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { 
-      days = 30, 
+      days, 
       start, 
       end, 
       category, 
@@ -123,7 +203,7 @@ export const getCustomerAnalytics = async (req: Request, res: Response, next: Ne
       previousLastOrder_lte
     } = req.query;
 
-    // Build date filter
+    // Build date filter - default to all data if no date parameters provided
     let dateFilter: any = {};
     if (start && end) {
       dateFilter = {
@@ -132,12 +212,14 @@ export const getCustomerAnalytics = async (req: Request, res: Response, next: Ne
           lte: new Date(end as string)
         }
       };
-    } else {
+    } else if (days) {
+      // Only apply days filter if explicitly provided
       const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
       dateFilter = {
         orderDate: { gte: daysAgo }
       };
     }
+    // If no date parameters, dateFilter remains empty object (no date filtering)
 
     // Build category filter
     let categoryFilter: any = {};
@@ -156,7 +238,7 @@ export const getCustomerAnalytics = async (req: Request, res: Response, next: Ne
     }
 
     // Get segmentation configuration (using default for this API)
-    const segmentationConfig = getSegmentationConfig();
+    const segmentationConfig = await getSegmentationConfig();
 
     // Get customer data with detailed information
     const customerData = await prisma.order.findMany({
@@ -183,6 +265,8 @@ export const getCustomerAnalytics = async (req: Request, res: Response, next: Ne
         }
       }
     });
+
+    logger.info(`Found ${customerData.length} orders`);
 
     // Group by customer and calculate metrics
     const customerMetrics = new Map();
@@ -240,7 +324,7 @@ export const getCustomerAnalytics = async (req: Request, res: Response, next: Ne
       const daysSinceLastOrder = Math.floor((Date.now() - metrics.lastOrderDate.getTime()) / (1000 * 60 * 60 * 24));
       
       // Calculate segment using configuration
-      const customerSegment = calculateCustomerSegment(
+      const customerSegment = await calculateCustomerSegment(
         metrics.totalSpent, 
         metrics.totalOrders, 
         avgOrderValue, 
@@ -378,7 +462,7 @@ export const getCustomerAnalytics = async (req: Request, res: Response, next: Ne
 export const getIndividualCustomerAnalysis = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const { days = 365 } = req.query;
+    const { days } = req.query;
 
     if (!customerId) {
       res.status(400).json({
@@ -388,7 +472,14 @@ export const getIndividualCustomerAnalysis = async (req: Request, res: Response,
       return;
     }
 
-    const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
+    // Build date filter - default to all data if no days parameter provided
+    let dateFilter: any = {};
+    if (days) {
+      const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
+      dateFilter = { orderDate: { gte: daysAgo } };
+    }
+
+    const segmentationConfig = await getSegmentationConfig();
 
     // Get customer information
     const customer = await prisma.customer.findUnique({
@@ -414,7 +505,7 @@ export const getIndividualCustomerAnalysis = async (req: Request, res: Response,
     const orders = await prisma.order.findMany({
       where: {
         customerId: Number(customerId),
-        orderDate: { gte: daysAgo }
+        ...dateFilter
       },
       include: {
         orderItems: {
@@ -525,7 +616,7 @@ export const getIndividualCustomerAnalysis = async (req: Request, res: Response,
     const daysSinceLastOrder = Math.floor((Date.now() - lastOrderDate.getTime()) / (1000 * 60 * 60 * 24));
 
     // Calculate segment
-    const segment = calculateCustomerSegment(totalSpent, totalOrders, avgOrderValue, daysSinceLastOrder);
+    const segment = await calculateCustomerSegment(totalSpent, totalOrders, avgOrderValue, daysSinceLastOrder, segmentationConfig);
 
     // Convert maps to objects
     const categoryBreakdownObj: any = {};
@@ -597,10 +688,8 @@ export const getCustomerPredictions = async (req: Request, res: Response, next: 
       customerIds, 
       predictionType = 'all', 
       months = 12,
-      businessType = 'default',
       includeRecommendations = true
     } = req.body as PredictionRequest & {
-      businessType?: string;
       includeRecommendations?: boolean;
     };
 
@@ -613,9 +702,9 @@ export const getCustomerPredictions = async (req: Request, res: Response, next: 
     }
 
     // Get recommendation configuration
-    const recommendationConfig = getRecommendationConfig(businessType);
+    const recommendationConfig = await getRecommendationConfig('default');
 
-    logger.info(`Generating predictions for ${customerIds.length} customers with type: ${predictionType}, businessType: ${businessType}`);
+    logger.info(`Generating predictions for ${customerIds.length} customers with type: ${predictionType}`);
 
     const predictions: CLVData[] = [];
     let totalPredictedRevenue = 0;
@@ -624,6 +713,7 @@ export const getCustomerPredictions = async (req: Request, res: Response, next: 
     let highValueCustomers = 0;
     let atRiskCustomers = 0;
 
+    const segmentationConfig = await getSegmentationConfig();
     // Process each customer
     for (const customerId of customerIds) {
       try {
@@ -658,12 +748,12 @@ export const getCustomerPredictions = async (req: Request, res: Response, next: 
         const acquisitionCost = estimateAcquisitionCost(clvData.predictedCLV);
 
         // Calculate customer segment
-        const customerSegment = calculateCustomerSegment(
+        const customerSegment = await calculateCustomerSegment(
           clvData.currentCLV,
           clvData.purchaseFrequency * clvData.customerLifespan,
           clvData.avgOrderValue,
           Math.floor((Date.now() - (nextPurchaseDate?.getTime() || Date.now())) / (1000 * 60 * 60 * 24)),
-          getSegmentationConfig(businessType)
+          segmentationConfig
         );
 
         // Generate recommendations if requested
@@ -790,15 +880,14 @@ const rankRecommendations = (products: ProductRecommendation[], config: any): Pr
 export const getCustomerRFMAnalysis = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { 
-      customerId,
-      businessType = 'default'
+      customerId
     } = req.query;
 
-    // Get RFM configuration based on business type
-    const rfmConfig = getRFMConfig(businessType as string);
-    const segmentationConfig = getSegmentationConfig(businessType as string);
+    // Get RFM configuration
+    const rfmConfig = await getRFMConfig('default');
+    const segmentationConfig = await getSegmentationConfig();
 
-    logger.info(`Performing RFM analysis for ${customerId ? 'specific customer' : 'all customers'} with business type: ${businessType}`);
+    logger.info(`Performing RFM analysis for ${customerId ? 'specific customer' : 'all customers'}`);
 
     let whereClause: any = {};
     if (customerId) {
@@ -856,7 +945,8 @@ export const getCustomerRFMAnalysis = async (req: Request, res: Response, next: 
 
     const rfmResults: RFMData[] = [];
 
-    customerRFMData.forEach((customerData: any) => {
+    // Process each customer sequentially to handle async operations
+    for (const [customerId, customerData] of customerRFMData) {
       const totalOrders = customerData.orders.length;
       const totalSpent = customerData.totalSpent;
       const daysSinceLastOrder = Math.floor((Date.now() - customerData.lastOrderDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -867,9 +957,9 @@ export const getCustomerRFMAnalysis = async (req: Request, res: Response, next: 
       // Calculate RFM segment
       const rfmSegment = calculateRFMSegment(rfmScore.rfmScore, rfmConfig);
       
-      // Calculate business segment
+      // Calculate business segment (config already loaded above)
       const avgOrderValue = totalSpent / totalOrders;
-      const businessSegment = calculateCustomerSegment(
+      const businessSegment = await calculateCustomerSegment(
         totalSpent, 
         totalOrders, 
         avgOrderValue, 
@@ -912,7 +1002,7 @@ export const getCustomerRFMAnalysis = async (req: Request, res: Response, next: 
         firstOrderDate: customerData.firstOrderDate,
         avgOrderValue
       });
-    });
+    }
 
     // Sort by RFM score (highest first)
     rfmResults.sort((a, b) => b.rfmScore - a.rfmScore);
@@ -940,7 +1030,6 @@ export const getCustomerRFMAnalysis = async (req: Request, res: Response, next: 
           avgRFMScore: Math.round(avgRFMScore * 100) / 100,
           segmentBreakdown,
           config: {
-            businessType,
             recencyThresholds: rfmConfig.scoring.recency.thresholds,
             frequencyThresholds: rfmConfig.scoring.frequency.thresholds,
             monetaryThresholds: rfmConfig.scoring.monetary.thresholds
@@ -970,20 +1059,19 @@ import {
 export const getCustomerChurnPrediction = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { 
-      days = 90,
-      businessType = 'default',
+      days,
       includeAllCustomers = false
     } = req.query;
 
-    // Get churn configuration based on business type
-    const churnConfig = getChurnConfig(businessType as string);
-    const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
+    // Get churn configuration
+    const churnConfig = await getChurnConfig('default');
 
-    logger.info(`Predicting customer churn with business type: ${businessType}, days: ${days}, includeAll: ${includeAllCustomers}`);
+    logger.info(`Predicting customer churn with days: ${days}, includeAll: ${includeAllCustomers}`);
 
-    // Build where clause based on includeAllCustomers parameter
+    // Build where clause based on includeAllCustomers parameter and days filter
     let whereClause: any = {};
-    if (!includeAllCustomers) {
+    if (!includeAllCustomers && days) {
+      const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
       whereClause.orderDate = { lt: daysAgo };
     }
 
@@ -1129,7 +1217,6 @@ export const getCustomerChurnPrediction = async (req: Request, res: Response, ne
           avgChurnRisk: Math.round(avgChurnRisk * 100) / 100,
           totalRevenueAtRisk: Math.round(totalRevenueAtRisk),
           config: {
-            businessType,
             inactivityThresholds: churnConfig.riskFactors.inactivity.thresholds,
             frequencyThresholds: churnConfig.riskFactors.orderFrequency.thresholds,
             valueThresholds: churnConfig.riskFactors.orderValue.thresholds
@@ -1160,14 +1247,13 @@ export const getPotentialCustomersForProducts = async (req: Request, res: Respon
     const { 
       productIds, 
       categoryIds, 
-      limit = 10,
-      businessType = 'default'
+      limit = 10
     } = req.query;
     
-    // Get potential customers configuration based on business type
-    const config = getPotentialCustomersConfig(businessType as string);
+    // Get potential customers configuration
+    const config = await getPotentialCustomersConfig('default');
     
-    logger.info(`Finding potential customers for products: ${productIds} with business type: ${businessType}`);
+    logger.info(`Finding potential customers for products: ${productIds}`);
 
     // Get customers who have purchased similar products
     const similarProductCustomers = await prisma.order.findMany({
@@ -1206,8 +1292,8 @@ export const getPotentialCustomersForProducts = async (req: Request, res: Respon
     });
 
     // Group orders by customer
-    const customerOrders = new Map<number, any[]>();
-    similarProductCustomers.forEach(order => {
+    const customerOrders = new Map<number, Order[]>();
+    similarProductCustomers.forEach((order: Order) => {
       const customerId = order.customerId;
       if (!customerOrders.has(customerId)) {
         customerOrders.set(customerId, []);
@@ -1294,7 +1380,6 @@ export const getPotentialCustomersForProducts = async (req: Request, res: Respon
           lowInterestCustomers,
           totalPotentialRevenue: Math.round(totalPotentialRevenue),
           config: {
-            businessType,
             purchaseFrequencyThresholds: config.scoring.purchaseFrequency.thresholds,
             totalSpentThresholds: config.scoring.totalSpent.thresholds,
             recencyThresholds: config.scoring.recency.thresholds
@@ -1311,15 +1396,21 @@ export const getPotentialCustomersForProducts = async (req: Request, res: Respon
 // 8. New Inventory and Customer Matching
 export const getNewInventoryCustomerMatching = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { days = 7 } = req.query;
-    const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
+    const { days } = req.query;
+    
+    // Build date filter - default to all data if no days parameter provided
+    let dateFilter: any = {};
+    if (days) {
+      const daysAgo = new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000);
+      dateFilter = { createdAt: { gte: daysAgo } };
+    }
 
-    logger.info(`Analyzing new inventory and customer matching for last ${days} days`);
+    logger.info(`Analyzing new inventory and customer matching${days ? ` for last ${days} days` : ' for all time'}`);
 
     // Get new items added in the specified period
     const newItems = await prisma.item.findMany({
       where: {
-        createdAt: { gte: daysAgo },
+        ...dateFilter,
         isActive: true
       },
       include: {
@@ -1366,9 +1457,9 @@ export const getNewInventoryCustomerMatching = async (req: Request, res: Respons
       });
 
       // Analyze customer interest in this new item
-      const interestedCustomers = similarCustomers.map(order => {
-        const totalSpent = order.orderItems.reduce((sum, item) => sum + (Number(item.pricePerUnit) * item.quantity), 0);
-        const similarItems = order.orderItems.filter(item => 
+      const interestedCustomers = similarCustomers.map((order: Order) => {
+        const totalSpent = order.orderItems.reduce((sum: number, item: OrderItem) => sum + (Number(item.pricePerUnit) * item.quantity), 0);
+        const similarItems = order.orderItems.filter((item: OrderItem) => 
           item.item.categoryId === newItem.categoryId || item.item.brandId === newItem.brandId
         ).length;
 
@@ -1417,7 +1508,7 @@ export const getNewInventoryCustomerMatching = async (req: Request, res: Respons
     res.json({
       success: true,
       data: {
-        newItems: newItems.map(item => ({
+        newItems: newItems.map((item: Item) => ({
           sku: item.sku,
           name: item.name,
           category: item.category?.name,
