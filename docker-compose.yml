@@ -1,5 +1,5 @@
 services:
-  db:
+  inventory_sales_db:
     image: mysql:8.0
     container_name: inventory_sales_db
     environment:
@@ -32,7 +32,7 @@ services:
     image: adminer:standalone
     restart: always
     depends_on:
-      - db
+      - inventory_sales_db
     ports:
       - 8080:8080
 
@@ -43,7 +43,7 @@ services:
     container_name: analytics_cron_job
     restart: unless-stopped
     depends_on:
-      - db
+      - inventory_sales_db
     environment:
       # Database connection
       - DB_HOST
@@ -68,7 +68,7 @@ services:
     container_name: analytics_api_server
     restart: unless-stopped
     depends_on:
-      - db
+      - inventory_sales_db
     environment:
       # Database connection
       - DB_HOST
@@ -87,6 +87,8 @@ services:
   export-pdf:
     build:
       context: ./export-pdf
+    env_file:
+      - ./.env
 
   customer-service:
     build:
