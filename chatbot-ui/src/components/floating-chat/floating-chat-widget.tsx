@@ -28,7 +28,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { sendAnalyticsQuery, createAnalyticsMessage, exportDataToPdf, type ExportRequest } from 'src/actions/analytics-chatbot';
 
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
@@ -214,11 +213,27 @@ export function FloatingChatWidget() {
             minHeight: 0,
             overflow: 'hidden'
           }}>
-            <Scrollbar sx={{
+            <Box sx={{
               flex: 1,
               p: 2,
+              overflowY: 'auto',
+              overflowX: 'hidden',
               minHeight: 0,
-              maxHeight: '100%'
+              maxHeight: '100%',
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'rgba(0,0,0,0.1)',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: 'rgba(0,0,0,0.3)',
+                borderRadius: '3px',
+                '&:hover': {
+                  background: 'rgba(0,0,0,0.4)',
+                },
+              },
             }}>
               <Stack spacing={2}>
                 {messages.map((message) => (
@@ -266,7 +281,7 @@ export function FloatingChatWidget() {
                 )}
               </Stack>
               <div ref={messagesEndRef} />
-            </Scrollbar>
+            </Box>
           </Box>
 
           {/* Quick Questions */}
